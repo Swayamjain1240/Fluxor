@@ -1,696 +1,345 @@
+<div align="center">
+
 # 🌌 Fluxor
 
-### Autonomous Agentic AI Platform for Real-Time Astronomical Event Discovery & Investigation
+### Agentic AI for Astronomical Transient Discovery & Scientific Investigation
 
-Fluxor is an **Agentic AI-powered astronomical research platform** designed to help scientists detect, investigate, and prioritize unusual astronomical events from **real-time and near-real-time telescope alerts**.
+*An AI research assistant that detects anomalies in astronomical data, runs a multi-agent scientific investigation, and generates evidence-based reports — with a human scientist always in the loop.*
 
-The system combines **Machine Learning, Deep Learning, LLMs, RAG, LangChain, LangGraph, astronomical data analysis, and scientific reasoning agents** to transform raw astronomical alerts into evidence-based scientific insights and follow-up observation recommendations.
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agent%20Orchestration-1C3C3C)](https://langchain-ai.github.io/langgraph/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
----
+[Overview](#-overview) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [API Reference](#-api-reference) • [Roadmap](#-production-roadmap)
 
-## 🚀 Problem
-
-Modern astronomical observatories generate a massive number of observations and transient alerts. Scientists cannot manually investigate every event in real time.
-
-A conventional system may detect:
-
-> "An unusual brightness change has occurred."
-
-But a scientist needs much more:
-
-* Is the event actually unusual?
-* Has this object been observed before?
-* What could have caused the event?
-* Are there similar historical events?
-* What does scientific literature say?
-* How confident is the classification?
-* Should another observation be performed?
-
-**Fluxor automates this initial investigation process while keeping the scientist in the loop.**
+</div>
 
 ---
 
-## 💡 Solution
+## 📖 Overview
 
-Fluxor creates an intelligent pipeline:
+Astronomers deal with an overwhelming volume of telescope data — most of it uninteresting, some of it scientifically valuable. **Fluxor** automates the first pass of that triage: it watches for statistical anomalies in astronomical data, and when it finds one worth a closer look, it kicks off a structured, multi-agent scientific investigation — the same way a research team would, just faster.
 
-```text
-Real-Time Astronomical Alerts
-            ↓
-      Alert Ingestion
-            ↓
-     Data Normalization
-            ↓
-      ML/DL Screening
-            ↓
-     Anomaly Detection
-            ↓
-    Candidate Prioritization
-            ↓
-      LangGraph Agents
-            ↓
- ┌──────────┼───────────┐
- ↓          ↓           ↓
-Catalog    RAG      Historical
-Agent      Agent     Agent
- └──────────┼───────────┘
-            ↓
-     Hypothesis Agent
-            ↓
-      Evidence Agent
-            ↓
-    Scientific Reasoning
-            ↓
-   Follow-up Planning Agent
-            ↓
-    Scientific Research Report
-            ↓
-       👨‍🔬 Scientist
+```
+Telescope data  →  ML anomaly detection  →  Multi-agent AI investigation  →  Scientific report  →  Human review
 ```
 
----
+This is **not** a chatbot wrapped around space data. It's a workflow automation system built on genuine ML (anomaly detection), genuine information retrieval (RAG over real astronomy literature), and genuine agentic reasoning (a stateful LangGraph pipeline with conditional re-investigation) — with a human scientist making every final call.
 
-# 🔭 Key Features
+> **Terminology note:** Fluxor is designed for **near-real-time astronomical alert intelligence**. The current build processes real astronomical data through **live or replayed alert streams** — see [Current Scope vs. Production](#-production-roadmap) for exactly what's real vs. simulated in this build.
 
-### 1. Real-Time Astronomical Alerts
+### Why this project exists
 
-Fluxor is designed to consume astronomical transient alerts from sources such as:
-
-* Zwicky Transient Facility (ZTF)
-* NASA General Coordinates Network (GCN)
-* Other compatible astronomical alert streams
-
-These alerts can contain information such as:
-
-* Object coordinates
-* Brightness
-* Observation time
-* Filters
-* Object identifiers
-* Event metadata
+- Real observatories (ZTF, TESS, GCN) generate volumes of data no human team can manually review end-to-end.
+- Most "AI + astronomy" demos are either pure ML with no reasoning, or a chatbot with no real pipeline behind it.
+- Fluxor tries to be neither — it's a small, honest, end-to-end version of how an autonomous discovery pipeline would actually be structured.
 
 ---
 
-### 2. ML/DL Anomaly Detection
+## ✨ Key Features
 
-Fluxor analyzes incoming observations and identifies unusual patterns.
+- 🔭 **Dual data ingestion paths** — photometric light curves (TESS/Kepler) and real-time-style alerts (ZTF/GCN), each normalized through its own pipeline before merging into a common investigation flow
+- 🧠 **ML-based anomaly screening** — Isolation Forest flags statistically unusual light curves before anything expensive (LLM calls) gets triggered
+- 🎯 **Triage Agent** — separates "statistically anomalous" from "scientifically interesting," filtering out known artifacts before deeper investigation
+- 🕸️ **5-agent LangGraph pipeline** — Triage → Catalog & Historical → Scientific RAG → Hypothesis & Evidence → Follow-up & Report, with **shared state** and a **bounded confidence loop** (re-investigates on low confidence, capped to avoid infinite loops)
+- 📚 **Real RAG pipeline** — retrieves evidence from a curated corpus of astronomy papers and NASA documentation via vector search
+- 🔬 **Multi-hypothesis reasoning** — generates competing explanations (stellar flare, variable star, transient, instrumental artifact) and weighs supporting/contradicting evidence for each
+- 📡 **Follow-up recommendations** — proposes what additional observations would help confirm or refute the leading hypothesis
+- 📊 **Built-in evaluation** — ML metrics (precision/recall/F1), RAG retrieval relevance, and agent task-completion tracking, not just a working demo
+- ✅ **Human-in-the-loop by design** — every AI conclusion is a recommendation; a scientist approves or rejects before anything is treated as a finding
 
-Possible techniques include:
+---
 
-* Isolation Forest
-* Autoencoders
-* Statistical anomaly detection
-* Time-series analysis
-* 1D CNN-based classification
+## 🏗 Architecture
 
-Example:
-
-```text
-Normal brightness:
-15.2 → 15.1 → 15.2 → 15.2
-
-Detected:
-15.2 → 15.1 → 12.4 → 15.2
-
-Anomaly Score:
-96%
+```
+   TESS / Kepler                          ZTF / GCN
+        │                                      │
+   Light Curves                       Astronomical Alerts
+        │                                      │
+  Feature Extraction                  Event Normalization
+        │                                      │
+  ML Anomaly Detection                 ML / Triage Screening
+   (Isolation Forest)                          │
+        └──────────────────┬───────────────────┘
+                            │
+                       Interesting?
+                       ╱          ╲
+                     No            Yes
+                      │              │
+                  Archive     LangGraph Orchestrator
+                                     │
+                              Triage Agent
+                       (scientific priority check)
+                                     │
+                     ┌───────────────┼───────────────┐
+                     │                               │
+            Catalog & Historical Agent      Scientific RAG Agent
+               (SIMBAD / VizieR)              (Chroma + papers)
+                     └───────────────┬───────────────┘
+                                     │
+                     Hypothesis & Evidence Agent
+                  (competing hypotheses + evidence weighing)
+                                     │
+                              Confidence Check
+                               ╱            ╲
+                             Low            High
+                       (max 3 retries)        │
+                              │          Follow-up Agent
+                       Re-investigate          │
+                                        Scientific Report
+                                    (structured JSON + Markdown)
+                                              │
+                                       Scientist Dashboard
+                                              │
+                                       Approve / Reject
 ```
 
-Only potentially interesting events are passed to the expensive Agentic AI pipeline.
+### Service architecture
 
----
+Fluxor is split into three services that communicate over a fixed JSON contract:
 
-### 3. Agentic Investigation
-
-Fluxor uses **LangGraph** to orchestrate specialized AI agents.
-
-The system can dynamically decide what information is required for an investigation instead of following a fixed sequence.
-
-```text
-Event
- ↓
-Triage
- ↓
-Catalog Search
- ↓
-Historical Analysis
- ↓
-Scientific Literature
- ↓
-Hypothesis Generation
- ↓
-Evidence Evaluation
- ↓
-Follow-up Planning
+```
+        React (Vite)
+              │
+        Express API  ──────►  MongoDB Atlas
+              │                (events, anomalies,
+       AI_SERVICE_URL           investigations, reports)
+              │
+     FastAPI + LangGraph
+              │
+    ┌─────────┼─────────┐
+    │         │         │
+ Isolation  Chroma   Astroquery
+  Forest   (RAG)    (SIMBAD/VizieR)
 ```
 
----
-
-### 4. Scientific RAG
-
-Fluxor uses Retrieval-Augmented Generation to ground its reasoning in scientific information.
-
-The knowledge base can contain:
-
-* Astronomy research papers
-* NASA documentation
-* Scientific reports
-* Historical observations
-* Astronomical terminology
-* Object classifications
-
-The system retrieves relevant information before generating scientific explanations.
+| Service | Responsibility |
+|---|---|
+| **Client** (React) | Scientist-facing dashboard — candidate list, investigation trace, report review, approve/reject |
+| **Server** (Node/Express) | Application layer — datasets, anomalies, reports, validations; calls the AI service and persists results |
+| **AI Service** (Python/FastAPI) | The actual science engine — anomaly detection, RAG, and the LangGraph multi-agent pipeline |
 
 ---
 
-### 5. Hypothesis Generation
+## 🧰 Tech Stack
 
-Fluxor does not immediately assume a single explanation.
+| Layer | Technology |
+|---|---|
+| Frontend | React (Vite), React Router, Axios, Recharts/Plotly.js |
+| Backend API | Node.js, Express, Mongoose |
+| Application DB | MongoDB Atlas |
+| AI Service | Python, FastAPI, Uvicorn |
+| Agent Orchestration | LangGraph, LangChain |
+| LLM | Claude / GPT-4-class model |
+| ML (Anomaly Detection) | scikit-learn (Isolation Forest) |
+| Vector Store (RAG) | Chroma |
+| Astronomy Data Access | astroquery, lightkurve, astropy |
+| Data Sources | NASA MAST (TESS/Kepler), SIMBAD, VizieR, NASA ADS/arXiv, ALeRCE, GCN |
 
-For example:
+---
 
-```text
-Candidate Event
+## 📁 Project Structure
 
-Stellar Flare       → 46%
-Variable Star       → 29%
-Instrument Artifact → 15%
-Other Transient     → 10%
 ```
-
-Each hypothesis is evaluated using supporting and contradicting evidence.
-
----
-
-### 6. Evidence-Based Scientific Reasoning
-
-For every conclusion, Fluxor attempts to provide:
-
-* Supporting evidence
-* Contradicting evidence
-* Relevant observations
-* Scientific literature
-* Confidence score
-* Recommended next investigation
-
-Example:
-
-```text
-Hypothesis:
-Stellar Flare
-
-Confidence:
-78%
-
-Supporting Evidence:
-✓ Rapid brightness increase
-✓ Short event duration
-✓ Historical similarity
-
-Missing Evidence:
-⚠ Spectroscopic confirmation
-```
-
----
-
-### 7. Follow-Up Observation Planning
-
-If an event appears scientifically significant, Fluxor generates a follow-up recommendation.
-
-Example:
-
-```text
-Priority: HIGH
-
-Recommended observation:
-Within 3 hours
-
-Filter:
-r-band
-
-Exposure:
-120 seconds
-
-Reason:
-Rapid brightness evolution requires
-additional observations.
-```
-
-The system is designed with a **Human-in-the-Loop** approach. Scientists review and approve recommendations before any real-world action.
-
----
-
-### 8. Scientist Dashboard
-
-The React dashboard provides:
-
-* Live astronomical events
-* Candidate priority
-* Anomaly scores
-* Object information
-* Light curves
-* AI investigation progress
-* Scientific evidence
-* Research-paper references
-* Hypotheses
-* Confidence scores
-* Follow-up recommendations
-
----
-
-# 🧠 Technology Stack
-
-## Artificial Intelligence
-
-* Python
-* Machine Learning
-* Deep Learning
-* LLMs
-* LangChain
-* LangGraph
-* Agentic AI
-* Function Calling
-* Structured Outputs
-
-## ML/DL
-
-* PyTorch
-* Scikit-learn
-* NumPy
-* Pandas
-* SciPy
-* Isolation Forest
-* Autoencoder
-* Time-Series Analysis
-
-## Astronomy
-
-* Astropy
-* FITS
-* Astronomical coordinates
-* Photometry
-* Light-curve analysis
-* ZTF alerts
-* NASA GCN
-* TESS / Gaia archival data
-
-## RAG
-
-* Qdrant / Chroma
-* Embedding Models
-* Semantic Search
-* Scientific Literature Retrieval
-* Reranking
-
-## Backend
-
-* FastAPI
-* PostgreSQL
-* Redis
-* Apache Kafka
-
-## Frontend
-
-* React
-* Vite
-* Tailwind CSS
-* Recharts / Plotly
-* React Flow
-
-## AI Observability
-
-* LangSmith
-* Agent tracing
-* Evaluation
-* LLM monitoring
-
----
-
-# 🏗️ System Architecture
-
-```text
-                         🌌 ASTRONOMICAL OBSERVATORIES
-                                      │
-                    ┌─────────────────┼─────────────────┐
-                    ↓                 ↓                 ↓
-                  ZTF                GCN          Other Sources
-                    │                 │                 │
-                    └─────────────────┼─────────────────┘
-                                      ↓
-                              ┌──────────────┐
-                              │    Kafka     │
-                              └──────┬───────┘
-                                     ↓
-                           ┌──────────────────┐
-                           │ Alert Ingestion  │
-                           └────────┬─────────┘
-                                    ↓
-                           ┌──────────────────┐
-                           │ Data Normalizer  │
-                           └────────┬─────────┘
-                                    ↓
-                           ┌──────────────────┐
-                           │    ML / DL       │
-                           │ Anomaly Detector │
-                           └────────┬─────────┘
-                                    ↓
-                              Candidate Event
-                                    │
-                                    ↓
-                         ╔════════════════════╗
-                         ║    LANGGRAPH       ║
-                         ║ AGENT ORCHESTRATOR  ║
-                         ╚══════════╤═════════╝
-                                    │
-              ┌─────────────────────┼─────────────────────┐
-              ↓                     ↓                     ↓
-        Catalog Agent          RAG Agent          History Agent
-              │                     │                     │
-              └─────────────────────┼─────────────────────┘
-                                    ↓
-                           Hypothesis Agent
-                                    ↓
-                             Evidence Agent
-                                    ↓
-                       Scientific Reasoning Agent
-                                    ↓
-                         Follow-Up Planner
-                                    ↓
-                         Scientific Report
-                                    ↓
-                              👨‍🔬 Scientist
-```
-
----
-
-# 📊 Example Workflow
-
-Suppose a telescope alert reports:
-
-```text
-Object: ZTF26XXXX
-Brightness: 18.9 → 16.1
-Change: +2.8 magnitude
-```
-
-Fluxor receives the alert and performs:
-
-```text
-1. Receive alert
-2. Validate data
-3. Calculate anomaly score
-4. Check historical observations
-5. Cross-match astronomical catalogs
-6. Search scientific literature
-7. Generate possible hypotheses
-8. Collect supporting evidence
-9. Evaluate confidence
-10. Recommend follow-up observation
-```
-
-Example result:
-
-```text
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       FLUXOR INVESTIGATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Object:
-ZTF26XXXX
-
-Anomaly Score:
-94%
-
-Most Likely:
-Stellar Flare
-
-Confidence:
-78%
-
-Alternative:
-Variable Star — 14%
-
-Evidence:
-✓ Rapid brightness increase
-✓ Short duration
-✓ Similar historical events
-✓ Catalog match
-
-Recommendation:
-HIGH PRIORITY FOLLOW-UP
-
-Reason:
-Additional observation is required
-for confirmation.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
-# 🔐 Human-in-the-Loop
-
-Fluxor is designed as a **scientist-assistance system**, not a replacement for astronomers.
-
-The AI provides:
-
-```text
-Detection
-   ↓
-Investigation
-   ↓
-Evidence
-   ↓
-Hypothesis
-   ↓
-Recommendation
-```
-
-The scientist provides:
-
-```text
-Validation
-   ↓
-Approval / Rejection
-   ↓
-Scientific Decision
-```
-
-This reduces the risk of an LLM making an unsupported scientific claim or automatically taking an irreversible action.
-
----
-
-# 📁 Proposed Project Structure
-
-```text
 fluxor/
-│
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   ├── agents/
-│   │   ├── astronomy/
-│   │   ├── ml/
-│   │   ├── rag/
-│   │   ├── services/
-│   │   ├── models/
-│   │   └── core/
-│   │
-│   ├── tests/
-│   └── requirements.txt
-│
-├── frontend/
+├── client/                  # React frontend
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── stores/
+│   │   ├── pages/            # Dashboard, Anomaly List, Object Detail
+│   │   └── components/
 │   └── package.json
 │
-├── data/
-│   ├── samples/
-│   └── knowledge_base/
+├── server/                  # Node.js/Express backend
+│   ├── models/                # Dataset, Anomaly, Report, Validation
+│   ├── routes/                 # /api/datasets, /api/anomalies
+│   ├── services/                # aiService.js — calls the AI microservice
+│   └── package.json
 │
-├── models/
-│
-├── notebooks/
-│
-├── docs/
-│
-├── docker-compose.yml
+├── ai-service/               # Python FastAPI + LangGraph
+│   ├── agents/                  # triage, catalog, rag, hypothesis, followup + graph.py
+│   ├── data/                     # loader, normalizer, feature extraction
+│   ├── models/                    # anomaly.py (Isolation Forest)
+│   ├── rag/                        # corpus, indexer, retriever
+│   ├── evaluation/                  # ML / RAG / agent evaluation scripts
+│   └── main.py
 │
 └── README.md
 ```
 
 ---
 
-# 🎯 Project Goals
+## 🚀 Getting Started
 
-Fluxor aims to:
+### Prerequisites
 
-1. Detect potentially interesting astronomical events.
-2. Reduce the number of events requiring manual inspection.
-3. Automatically investigate high-priority candidates.
-4. Combine ML with LLM-based scientific reasoning.
-5. Ground AI responses using scientific literature.
-6. Provide evidence and confidence rather than unsupported predictions.
-7. Help scientists prioritize follow-up observations.
-8. Keep humans involved in final scientific decisions.
+- Node.js 18+
+- Python 3.10+
+- A MongoDB Atlas connection string (free tier is enough)
+- An LLM API key (Claude or OpenAI)
 
----
+### 1. Clone the repo
 
-# 🛣️ Development Roadmap
-
-### Phase 1 — Data Pipeline
-
-* [ ] Astronomical alert ingestion
-* [ ] Alert parser
-* [ ] Data normalization
-* [ ] PostgreSQL schema
-* [ ] Kafka integration
-
-### Phase 2 — ML
-
-* [ ] Feature extraction
-* [ ] Anomaly detection
-* [ ] Candidate scoring
-* [ ] Light-curve analysis
-
-### Phase 3 — RAG
-
-* [ ] Scientific document collection
-* [ ] Embedding pipeline
-* [ ] Qdrant setup
-* [ ] Retrieval
-* [ ] Reranking
-
-### Phase 4 — Agentic AI
-
-* [ ] LangGraph state
-* [ ] Triage Agent
-* [ ] Catalog Agent
-* [ ] Historical Analysis Agent
-* [ ] RAG Agent
-* [ ] Hypothesis Agent
-* [ ] Evidence Agent
-* [ ] Follow-up Agent
-
-### Phase 5 — Frontend
-
-* [ ] Live event dashboard
-* [ ] Candidate explorer
-* [ ] Light-curve visualization
-* [ ] AI investigation interface
-* [ ] Evidence panel
-* [ ] Follow-up recommendation UI
-
-### Phase 6 — Evaluation
-
-* [ ] ML evaluation
-* [ ] RAG evaluation
-* [ ] Agent evaluation
-* [ ] Hallucination checks
-* [ ] Scientific accuracy analysis
-* [ ] LangSmith tracing
-
----
-
-# ⏱️ Target Timeline
-
-**MVP:** 15–20 days
-
-Approximately:
-
-```text
-4–5 hours/day
-×
-15–20 days
-=
-60–100 hours
+```bash
+git clone https://github.com/<your-username>/fluxor.git
+cd fluxor
 ```
 
-The first version should focus on:
+### 2. AI Service (Python)
 
-```text
-ZTF/GCN
-   ↓
-Alert Processing
-   ↓
-ML Anomaly Detection
-   ↓
-LangGraph
-   ↓
-Scientific RAG
-   ↓
-Hypothesis + Evidence
-   ↓
-Follow-up Recommendation
-   ↓
-Scientist Dashboard
+```bash
+cd ai-service
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+cp .env.example .env            # add LLM_API_KEY, VECTOR_STORE_PATH
+uvicorn main:app --reload --port 8000
 ```
 
-Advanced telescope control and complex deep-learning models can be added later.
+### 3. Backend (Node.js)
+
+```bash
+cd server
+npm install
+
+cp .env.example .env            # add MONGODB_URI, AI_SERVICE_URL=http://localhost:8000
+npm run dev
+```
+
+### 4. Frontend (React)
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Visit `http://localhost:5173` — you should see the candidate dashboard.
 
 ---
 
-# 🌟 Future Scope
+## 🔌 API Reference
 
-Potential future extensions include:
+### Backend (Node/Express)
 
-* Multi-observatory event correlation
-* Gravitational-wave event analysis
-* Automated telescope scheduling
-* Reinforcement-learning observation planning
-* Real telescope API integration
-* Multi-modal astronomical image analysis
-* CNN/ViT-based image classification
-* Spectral analysis
-* Autonomous scientific experiment planning
-* Scientist collaboration
-* Event notification system
-* Public discovery database
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Service health check |
+| `POST` | `/api/datasets` | Register a new dataset |
+| `GET` | `/api/datasets` | List datasets |
+| `POST` | `/api/datasets/:id/detect` | Trigger anomaly detection on a dataset |
+| `GET` | `/api/anomalies?datasetId=...` | List anomalies for a dataset |
+| `GET` | `/api/anomalies/:objectId` | Get anomaly details + report |
+| `GET` | `/api/anomalies/:objectId/lightcurve` | Raw time/flux data for plotting |
+| `POST` | `/api/anomalies/:objectId/analyze` | Trigger the AI investigation |
+| `POST` | `/api/anomalies/:objectId/validate` | Submit scientist approve/reject decision |
 
----
+### AI Service (FastAPI)
 
-# 📚 Scientific Data Sources
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Service health check |
+| `POST` | `/detect_anomalies` | Run ML screening on a dataset, return ranked anomalies |
+| `POST` | `/analyze_object` | Trigger the full LangGraph investigation for one object |
 
-Potential data sources include:
+<details>
+<summary><strong>Response shape — <code>POST /analyze_object</code></strong></summary>
 
-* NASA General Coordinates Network (GCN)
-* Zwicky Transient Facility (ZTF)
-* NASA MAST
-* TESS
-* Gaia
-* Hubble Space Telescope archives
-* Public astronomical transient catalogs
-* Scientific literature / arXiv
+```json
+{
+  "catalog_summary": {},
+  "hypotheses": [
+    {
+      "name": "Stellar Flare",
+      "confidence": 0.78,
+      "supporting_evidence": ["..."],
+      "contradicting_evidence": ["..."]
+    }
+  ],
+  "followup_plan": ["..."],
+  "report_markdown": "...",
+  "status": "completed"
+}
+```
 
----
+`status` transitions through `queued → running → completed | failed | needs_review` — investigations aren't instantaneous, so the dashboard polls this to show progress.
 
-# ⚠️ Important Scope Note
-
-Fluxor is a **research prototype and scientific decision-support system**.
-
-AI-generated classifications and recommendations should be treated as **candidate hypotheses**, not confirmed astronomical discoveries.
-
-Final scientific interpretation and observation decisions remain with qualified researchers.
-
----
-
-# 👨‍💻 Project
-
-**Project Name:** Fluxor
-**Category:** Space Science / Astronomy / Agentic AI
-**Focus:** Real-Time Astronomical Event Intelligence
-**Architecture:** ML + LLM + RAG + Multi-Agent + LangGraph
-**Frontend:** React
-**Backend:** FastAPI
-**Status:** Final-Year Major Project
+</details>
 
 ---
 
-## ⭐ Core Idea
+## 📊 Evaluation
 
-> **Fluxor turns real-time astronomical alerts into actionable scientific intelligence by combining ML-based anomaly detection with Agentic AI, scientific RAG, astronomical data analysis, and human-in-the-loop research workflows.**
+Fluxor includes a dedicated evaluation layer rather than relying on demo-only validation:
 
-**Detect → Investigate → Reason → Validate → Recommend**
+| Layer | Metrics |
+|---|---|
+| **ML** | Precision, Recall, F1, False Positive Rate (against a labeled subset of known objects) |
+| **RAG** | Retrieval relevance and citation correctness against a manual test-query set |
+| **Agents** | Investigation completion rate, evidence coverage per hypothesis, invalid-hypothesis rate |
+
+Results are documented in [`ai-service/evaluation/`](ai-service/evaluation/).
+
+---
+
+## 🎯 Current Scope vs. Production Roadmap
+
+Built solo in ~17 days as a portfolio project — scope was intentionally curated for depth over breadth. Here's exactly what's real in this build vs. what a production version would add:
+
+| Component | This build (MVP) | Production version |
+|---|---|---|
+| Alert ingestion | Replayed archived alerts, async | Live ZTF/GCN via Kafka |
+| Anomaly detection | Isolation Forest | + Autoencoder/1D-CNN comparison |
+| Vector store | Chroma (local) | Qdrant (clustered) |
+| RAG corpus | ~80-120 curated papers | Continuously updated corpus |
+| Retrieval | Plain top-k vector search | Cross-encoder reranking |
+| Reprocessing | Bounded confidence loop (max 3 retries) | Same, with richer escalation paths |
+| Historical analysis | Merged into Catalog Agent | Dedicated agent |
+
+This distinction is intentional — the goal was to build a genuinely working, honestly-scoped system rather than an impressive-sounding one that doesn't run end-to-end.
+
+---
+
+## 🖼 Demo
+
+*(Add screenshots/GIFs of the dashboard, investigation trace, and a sample report here once available)*
+
+*(Add a link to the demo video here)*
+
+---
+
+## 🤝 Contributing
+
+This started as a solo portfolio project, but issues and PRs are welcome — especially around evaluation methodology, additional data source integrations, or agent prompt improvements.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes
+4. Open a PR
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgements
+
+- [NASA MAST](https://mast.stsci.edu/) for TESS/Kepler light curve access
+- [SIMBAD](http://simbad.u-strasbg.fr/simbad/) & [VizieR](https://vizier.u-strasbg.fr/) for astronomical catalog data
+- [ALeRCE](https://alerce.online/) for historical ZTF alert access
+- [GCN](https://gcn.nasa.gov/) for real-time astronomical alert infrastructure
+- [LangGraph](https://langchain-ai.github.io/langgraph/) for stateful agent orchestration
+
+---
+
+<div align="center">
+
+*Built to help astronomers spend less time triaging noise and more time on discoveries that matter.*
+
+</div>
