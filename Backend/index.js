@@ -7,6 +7,8 @@ dns.setServers(["1.1.1.1","8.8.8.8"]);
 import {errorHandlers} from "./middleware/errorMiddleware.js"
 import { connectDB } from "./utils/db.js";
 
+import authRouter from "./routes/authRoute.js"
+
 const app = express()
 
 const PORT = process.env.PORT;
@@ -17,6 +19,7 @@ app.get("/api/health", (req,res)=>{
     res.status(200).json({success: true,message: "Fluxor backend is running",});
 });
 
+app.use("/api/auth", authRouter);
 app.use(errorHandlers);
 
 app.listen(PORT,(req,res)=>{
