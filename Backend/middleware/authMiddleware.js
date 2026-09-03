@@ -1,30 +1,31 @@
-import jwt from "jsonwebtoken"
-import User from "../models/userModel";
+import jwt from "jsonwebtoken";
 
-
-export const Protect = async (req, res, next) => {
+export const protect = (req, res, next) => {
     try {
+        const authHeader = req.headers.authorization;
 
-        let token;
-
-        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
-            token = req.headers.authorization.split(" ")[1];
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({
+                success: false,
+                message: "Access token required",
+            });
         }
 
-        if (!token) {
-            return res.status(401).json({ success: false, message: 'Not authorized, access token missing' });
-        }
+        const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = await User.findById(decoded.id).select('-password -refreshToken');
+        const decoded = jwt.verify(
+            token,
+            process.env.ACCESS_TOKEN_SECRET
+        );
 
-        if (!req.user) {
-            return res.status(401).json({ success: false, message: 'User not found' });
-        }
+        req.user = decoded;
 
         next();
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: "internal server error", });
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired access token",
+        });
     }
-}
+};
