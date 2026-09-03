@@ -24,5 +24,9 @@ app.use(errorHandlers);
 
 app.listen(PORT,(req,res)=>{
     connectDB();
+
+
+
+    
     console.log("server is running..");
 })
