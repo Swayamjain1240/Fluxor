@@ -1,28 +1,30 @@
 import jwt from "jsonwebtoken"
+import User from "../models/userModel";
 
-export const authMiddleware =  (req,res, next) => {
+
+export const Protect = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        if(!authHeader){
-            return res.status(401).json({message:"your authorization header missing"});
-        };
 
-        const auth = authHeader.startsWith("Bearer ")
-        if(!auth){
-            return res.status(401).json({message:"you access token missing"});
-        };
+        let token;
 
-        const token = authHeader.split(" ")[1];
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+            token = req.headers.authorization.split(" ")[1];
+        }
 
-        const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        if(!decode){
-            return res.status(401).json({message:"your token cant verify"});
-        };
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Not authorized, access token missing' });
+        }
 
-        req.user=decode;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id).select('-password -refreshToken');
+
+        if (!req.user) {
+            return res.status(401).json({ success: false, message: 'User not found' });
+        }
+
         next();
 
     } catch (error) {
-         return res.status(500).json({success: false,message: "internal server error",});
-    }   
+        return res.status(500).json({ success: false, message: "internal server error", });
+    }
 }

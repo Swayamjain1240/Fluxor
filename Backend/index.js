@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import dns from "dns"
 dns.setServers(["1.1.1.1","8.8.8.8"]);
-import {errorHandlers} from "./middleware/errorMiddleware.js"
 import { connectDB } from "./utils/db.js";
 
 import authRouter from "./routes/authRoute.js"
@@ -20,9 +19,8 @@ app.get("/api/health", (req,res)=>{
 });
 
 app.use("/api/auth", authRouter);
-app.use(errorHandlers);
 
-app.listen(PORT,(req,res)=>{
-    connectDB();
+app.listen(PORT,()=>{
+    connectDB()
     console.log("server is running..");
 })
