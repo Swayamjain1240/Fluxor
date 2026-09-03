@@ -1,35 +1,37 @@
 import express from "express";
 
 import {
-    uploadDataset,
+    createDataset,
     getDatasets,
     getDatasetById,
     deleteDataset,
 } from "../controllers/dataset.controller.js";
 
-import { Protect } from "../middleware/auth.middleware.js";
-import upload from "../middleware/upload.middleware.js";
+import { Protect  } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
 router.post(
-    "/upload",
-    Protect,
-    upload.single("dataset"),
-    uploadDataset
+    "/",
+    Protect ,
+    createDataset
 );
 
 router.get(
     "/",
-    Protect,
+    Protect ,
     getDatasets
 );
 
-router.get("/:datasetId",Protect,getDatasetById);
+router.get(
+    "/:datasetId",
+    Protect ,
+    getDatasetById
+);
 
 router.delete(
     "/:datasetId",
-    Protect,
+    Protect ,
     deleteDataset
 );
 
