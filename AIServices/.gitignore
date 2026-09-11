@@ -5,3 +5,5 @@ __pycache__/
 
 rag/documents/*
 !rag/documents/README.md
+
+rag/chroma_db/
