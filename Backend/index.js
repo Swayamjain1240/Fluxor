@@ -16,12 +16,12 @@ import validationRoutes from "./routes/validationRoute.js";
 import dashboardRoutes from "./routes/dashboardRoute.js";
 
 const app = express()
-// app.use(
-//     cors({
-//         origin: "http://localhost:5173",
-//         credentials: true,
-//     })
-// );
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+);
 const PORT = process.env.PORT;
 
 app.use(express.json());
