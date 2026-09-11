@@ -3,6 +3,9 @@ from typing import Any
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
+from graph.workflow import (
+    fluxorWorkflow
+)
 
 load_dotenv()
 
@@ -78,34 +81,129 @@ async def detect_anomalies(
     }
 
 @app.post("/analyze_object")
-async def analyze_object(
+def analyze_object(
     request: AnalyzeObjectRequest
 ):
 
-    # Placeholder
-    # Real LangGraph workflow comes in Part 4
+    try:
 
-    return {
-        "success": True,
+        initialState = {
 
-        "candidateId":
-            request.candidateId,
+            "candidateId":
+                request.candidateId,
 
-        "objectId":
-            request.objectId,
+            "objectId":
+                request.objectId,
 
-        "iterationCount": 0,
+            "anomalyScore":
+                request.anomalyScore,
 
-        "confidence": 0,
+            "priority":
+                request.priority,
 
-        "catalogSummary": {},
+            "metadata":
+                request.metadata,
 
-        "hypotheses": [],
+            "lightCurve": [
 
-        "evidence": {},
+                point.model_dump()
 
-        "followupPlan": [],
+                for point
+                in request.lightCurve
+            ],
 
-        "reportMarkdown":
-            "Agentic investigation is not implemented yet."
-    }
+            "iterationCount": 0,
+
+            "hypotheses": [],
+
+            "ragEvidence": [],
+
+            "confidence": 0,
+
+            "status":
+                "started"
+        }
+
+
+        result = (
+            fluxorWorkflow.invoke(
+                initialState
+            )
+        )
+
+
+        return {
+
+            "success":
+                True,
+
+            "candidateId":
+                request.candidateId,
+
+            "objectId":
+                request.objectId,
+
+            "status":
+                result.get(
+                    "status"
+                ),
+
+            "triageResult":
+                result.get(
+                    "triageResult",
+                    {}
+                ),
+
+            "iterationCount":
+                result.get(
+                    "iterationCount",
+                    0
+                ),
+
+            "confidence":
+                result.get(
+                    "confidence",
+                    0
+                ),
+
+            "catalogSummary":
+                result.get(
+                    "catalogData",
+                    {}
+                ),
+
+            "hypotheses":
+                result.get(
+                    "hypotheses",
+                    []
+                ),
+
+            "evidence":
+                result.get(
+                    "evidence",
+                    {}
+                ),
+
+            "followupPlan":
+                result.get(
+                    "followupPlan",
+                    []
+                ),
+
+            "reportMarkdown":
+                result.get(
+                    "reportMarkdown",
+                    ""
+                )
+        }
+
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Agent investigation failed: "
+                + str(error)
+            )
+        )
