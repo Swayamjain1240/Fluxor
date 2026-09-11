@@ -17,7 +17,7 @@ import Candidates from "./pages/Candidates.jsx";
 import CandidateDetail from "./pages/CandidateDetail.jsx";
 
 import Investigations from "./pages/Investigations.jsx";
-import Investigation from "./pages/Investigation.jsx";
+import Investigation from "./pages/Investigations.jsx";
 
 import Report from "./pages/Report.jsx";
 

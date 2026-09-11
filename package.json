@@ -1,0 +1,27 @@
+{
+  "name": "fluxor",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">",
+  "main": "index.js",
+  "scripts": {
+    "frontend": "npm --prefix frontend run dev",
+    "backend": "npm --prefix backend run dev",
+    "ai": "aiServices\\venv\\Scripts\\python.exe -m uvicorn main:app --reload --port 8000 --app-dir aiServices",
+    "dev": "concurrently --kill-others-on-fail -n FRONTEND,BACKEND,AI \"npm run frontend\" \"npm run backend\" \"npm run ai\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Swayamjain1240/Fluxor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Swayamjain1240/Fluxor/issues"
+  },
+  "homepage": "https://github.com/Swayamjain1240/Fluxor#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
