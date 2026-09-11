@@ -5,9 +5,9 @@ import {
     getCandidates,
     getCandidateById,
     getCandidateLightCurve,
-} from "../controllers/anomaly.controller.js";
+} from "../controllers/anomalyController.js";
 
-import {Protect} from "../middleware/auth.middleware.js";
+import {Protect} from "../middleware//authMiddleware.js";
 
 const router = express.Router();
 

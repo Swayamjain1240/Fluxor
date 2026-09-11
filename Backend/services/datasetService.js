@@ -1,4 +1,4 @@
-import DatasetModel from "../models/Dataset.js";
+import DatasetModel from "../models/datasetModel.js";
 
 
 // CREATE DATASET

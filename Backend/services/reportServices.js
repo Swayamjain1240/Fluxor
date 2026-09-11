@@ -1,5 +1,5 @@
-import ReportModel from "../models/Report.js";
-import InvestigationModel from "../models/Investigation.js";
+import ReportModel from "../models/reportModel.js";
+import InvestigationModel from "../models/investigationModel.js";
 
 
 // CREATE REPORT FROM AI RESULT

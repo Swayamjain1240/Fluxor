@@ -4,9 +4,9 @@ import {
     getReports,
     getReportById,
     getReportByInvestigation,
-} from "../controllers/report.controller.js";
+} from "../controllers/reportController.js";
 
-import { Protect } from "../middleware/auth.middleware.js";
+import { Protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

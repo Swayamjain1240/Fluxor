@@ -3,9 +3,9 @@ import express from "express";
 import {
     getDashboardSummary,
     getRecentActivity,
-} from "../controllers/dashboard.controller.js";
+} from "../controllers/dashboardController.js";
 
-import { Protect } from "../middleware/auth.middleware.js";
+import { Protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

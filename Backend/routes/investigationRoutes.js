@@ -5,9 +5,9 @@ import {
     getInvestigations,
     getInvestigationById,
     getInvestigationStatus,
-} from "../controllers/investigation.controller.js";
+} from "../controllers/investigationController.js";
 
-import { Protect } from "../middleware/auth.middleware.js";
+import { Protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

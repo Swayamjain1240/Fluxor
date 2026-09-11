@@ -1,6 +1,6 @@
-import CandidateModel from "../models/Candidate.js";
-import DatasetModel from "../models/Dataset.js";
-import InvestigationModel from "../models/Investigation.js";
+import CandidateModel from "../models/candidateModel.js";
+import DatasetModel from "../models/datasetModel.js";
+import InvestigationModel from "../models/investigationModel.js";
 
 import {
     analyzeCandidateAI,
@@ -8,7 +8,7 @@ import {
 
 import {
     createReportFromAI,
-} from "./report.service.js";
+} from "./reportServices.js";
 
 
 export const startInvestigationService = async (

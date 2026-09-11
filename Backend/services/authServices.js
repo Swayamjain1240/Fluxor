@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
 
-import UserModel from "../models/User.js";
+import UserModel from "../models/userModel.js";
 
 
 const generateAccessToken = (userId) => {

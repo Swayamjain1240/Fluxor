@@ -1,5 +1,5 @@
-import DatasetModel from "../models/Dataset.js";
-import CandidateModel from "../models/Candidate.js";
+import DatasetModel from "../models/datasetModel.js";
+import CandidateModel from "../models/candidateModel.js";
 
 import {
     detectAnomaliesAI,

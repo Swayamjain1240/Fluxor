@@ -1,7 +1,7 @@
-import DatasetModel from "../models/Dataset.js";
-import CandidateModel from "../models/Candidate.js";
-import InvestigationModel from "../models/Investigation.js";
-import ValidationModel from "../models/Validation.js";
+import DatasetModel from "../models/datasetModel.js";
+import CandidateModel from "../models/candidateModel.js";
+import InvestigationModel from "../models/investigationModel.js";
+import ValidationModel from "../models/validationModel.js";
 
 
 

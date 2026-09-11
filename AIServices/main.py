@@ -207,3 +207,29 @@ def analyze_object(
                 + str(error)
             )
         )
+
+
+@app.get("/health")
+def health():
+
+    return {
+        "success": True,
+
+        "service":
+            "Fluxor AI Service",
+
+        "status":
+            "running",
+
+        "components": {
+
+            "ml":
+                "available",
+
+            "rag":
+                "available",
+
+            "agents":
+                "available"
+        }
+    }

@@ -4,9 +4,9 @@ import {
     createValidation,
     getValidations,
     getValidationById,
-} from "../controllers/validation.controller.js";
+} from "../controllers/validationController.js";
 
-import { Protect } from "../middleware/auth.middleware.js";
+import { Protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

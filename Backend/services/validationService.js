@@ -1,6 +1,6 @@
-import ValidationModel from "../models/Validation.js";
-import ReportModel from "../models/Report.js";
-import InvestigationModel from "../models/Investigation.js";
+import ValidationModel from "../models/validationModel.js";
+import ReportModel from "../models/reportModel.js";
+import InvestigationModel from "../models/investigationModel.js";
 
 export const createValidationService =async (userId, validationData) => {
 

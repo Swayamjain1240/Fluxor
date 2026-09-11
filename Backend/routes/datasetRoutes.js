@@ -5,9 +5,9 @@ import {
     getDatasets,
     getDatasetById,
     deleteDataset,
-} from "../controllers/dataset.controller.js";
+} from "../controllers/datasetController.js";
 
-import { Protect  } from "../middleware/auth.middleware.js";
+import { Protect  } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
