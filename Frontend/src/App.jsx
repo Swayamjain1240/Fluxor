@@ -5,11 +5,18 @@ import {
     Navigate
 } from "react-router-dom";
 
-import Login from "./pages/Login.jsx";
-import Signup from "./pages/Signup.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Dashboard from "./pages/Dashboard";
+import Datasets from "./pages/Datasets";
+import DatasetDetail from "./pages/DatasetDetail";
+
+import Candidates from "./pages/Candidates.jsx";
+import CandidateDetail from "./pages/CandidateDetail.jsx";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
 
 
 const App = () => {
@@ -19,17 +26,6 @@ const App = () => {
         <BrowserRouter>
 
             <Routes>
-
-                <Route
-                    path="/"
-                    element={
-                        <Navigate
-                            to="/dashboard"
-                            replace
-                        />
-                    }
-                />
-
 
                 <Route
                     path="/login"
@@ -48,18 +44,78 @@ const App = () => {
 
 
                 <Route
-                    path="/dashboard"
                     element={
 
                         <ProtectedRoute>
 
-                            <Dashboard />
+                            <AppLayout />
 
                         </ProtectedRoute>
 
                     }
+                >
+
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <Dashboard />
+                        }
+                    />
+
+
+                    <Route
+                        path="/datasets"
+                        element={
+                            <Datasets />
+                        }
+                    />
+
+
+                    <Route
+                        path="/datasets/:datasetId"
+                        element={
+                            <DatasetDetail />
+                        }
+                    />
+
+                    <Route
+                        path="/candidates"
+                        element={
+                            <Candidates />
+                        }
+                    />
+
+
+                    <Route
+                        path="/candidates/:candidateId"
+                        element={
+                            <CandidateDetail />
+                        }
+                    />
+
+                </Route>
+
+
+                <Route
+                    path="/"
+                    element={
+                        <Navigate
+                            to="/dashboard"
+                            replace
+                        />
+                    }
                 />
 
+
+                <Route
+                    path="*"
+                    element={
+                        <Navigate
+                            to="/dashboard"
+                            replace
+                        />
+                    }
+                />
 
             </Routes>
 

@@ -5,46 +5,143 @@ import {
 
 const Sidebar = () => {
 
+    const getLinkStyle = ({
+        isActive
+    }) => {
+
+        return {
+
+            padding:
+                "12px 14px",
+
+            textDecoration:
+                "none",
+
+            borderRadius:
+                "8px",
+
+            color:
+                isActive
+                    ? "#ffffff"
+                    : "#9ba3b2",
+
+            background:
+                isActive
+                    ? "#202633"
+                    : "transparent"
+        };
+    };
+
+
     return (
 
-        <aside className="sidebar">
+        <aside
+            style={{
+                width: "240px",
 
-            <div className="sidebar-brand">
+                minHeight:
+                    "100vh",
 
-                <h2>
+                padding:
+                    "24px 18px",
+
+                background:
+                    "#0d1017",
+
+                borderRight:
+                    "1px solid #242936",
+
+                position:
+                    "fixed",
+
+                left: 0,
+
+                top: 0
+            }}
+        >
+
+            <div>
+
+                <h2
+                    style={{
+                        margin: 0,
+
+                        letterSpacing:
+                            "3px"
+                    }}
+                >
+
                     FLUXOR
+
                 </h2>
 
-                <span>
+
+                <span
+                    style={{
+                        display: "block",
+
+                        marginTop: "6px",
+
+                        color: "#818898",
+
+                        fontSize: "12px"
+                    }}
+                >
+
                     Scientific Intelligence
+
                 </span>
 
             </div>
 
 
-            <nav className="sidebar-nav">
+            <nav
+                style={{
+                    display: "flex",
+
+                    flexDirection:
+                        "column",
+
+                    gap: "8px",
+
+                    marginTop:
+                        "40px"
+                }}
+            >
 
                 <NavLink
                     to="/dashboard"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "nav-link active"
-                            : "nav-link"
+                    style={
+                        getLinkStyle
                     }
                 >
+
                     Dashboard
+
                 </NavLink>
 
 
                 <NavLink
                     to="/datasets"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "nav-link active"
-                            : "nav-link"
+                    style={
+                        getLinkStyle
                     }
                 >
+
                     Datasets
+
+                </NavLink>
+
+
+                <NavLink
+                    to="/candidates"
+                    style={
+                        getLinkStyle
+                    }
+                >
+
+                    Candidates
+
                 </NavLink>
 
             </nav>
