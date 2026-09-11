@@ -1,4 +1,4 @@
-from rag.vectorstore import (
+from rag.vectorStore import (
     get_vectorstore
 )
 
