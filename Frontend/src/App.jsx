@@ -15,6 +15,8 @@ import DatasetDetail from "./pages/DatasetDetail";
 import Candidates from "./pages/Candidates.jsx";
 import CandidateDetail from "./pages/CandidateDetail.jsx";
 
+import Investigation from "./pages/Investigation.jsx";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/AppLayout";
 
@@ -90,6 +92,14 @@ const App = () => {
                         path="/candidates/:candidateId"
                         element={
                             <CandidateDetail />
+                        }
+                    />
+
+                    <Route
+                        path="/investigations/:investigationId"
+
+                        element={
+                            <Investigation />
                         }
                     />
 
