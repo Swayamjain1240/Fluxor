@@ -5,6 +5,7 @@ import {
 
 import {
     Link,
+    useNavigate,
     useParams
 } from "react-router-dom";
 
@@ -13,8 +14,14 @@ import {
     getCandidateLightCurve
 } from "../services/anomalyService.js";
 
+import {
+    startInvestigation
+} from "../services/investigationService.js";
+
 import PriorityBadge from "../components/anomaly/PriorityBadge.jsx";
+
 import LightCurveChart from "../components/anomaly/LightCurveChart.jsx";
+
 import Loader from "../components/Loader.jsx";
 
 
@@ -23,6 +30,10 @@ const CandidateDetail = () => {
     const {
         candidateId
     } = useParams();
+
+
+    const navigate =
+        useNavigate();
 
 
     const [
@@ -44,16 +55,29 @@ const CandidateDetail = () => {
 
 
     const [
+        analyzing,
+        setAnalyzing
+    ] = useState(false);
+
+
+    const [
         error,
         setError
     ] = useState("");
 
+
+    // =========================================
+    // Load Candidate + Light Curve
+    // =========================================
 
     useEffect(() => {
 
         const loadCandidate = async () => {
 
             try {
+
+                setError("");
+
 
                 const [
                     candidateData,
@@ -84,6 +108,12 @@ const CandidateDetail = () => {
 
             } catch (error) {
 
+                console.error(
+                    "Candidate loading error:",
+                    error
+                );
+
+
                 setError(
                     error.response
                         ?.data
@@ -104,6 +134,80 @@ const CandidateDetail = () => {
     }, [candidateId]);
 
 
+    // =========================================
+    // Start Scientific Investigation
+    // =========================================
+
+    const handleAnalyze = async () => {
+
+        try {
+
+            setAnalyzing(true);
+
+            setError("");
+
+
+            const data =
+                await startInvestigation(
+                    candidateId
+                );
+
+
+            console.log(
+                "Investigation response:",
+                data
+            );
+
+
+            const investigationId =
+                data.investigation?._id
+                ||
+                data.investigationId
+                ||
+                data._id;
+
+
+            if (!investigationId) {
+
+                throw new Error(
+                    "Investigation ID missing from backend response"
+                );
+            }
+
+
+            navigate(
+                `/investigations/${investigationId}`
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Investigation error:",
+                error
+            );
+
+
+            setError(
+                error.response
+                    ?.data
+                    ?.message
+                ||
+                error.message
+                ||
+                "Scientific investigation failed"
+            );
+
+        } finally {
+
+            setAnalyzing(false);
+        }
+    };
+
+
+    // =========================================
+    // Initial Loading
+    // =========================================
+
     if (loading) {
 
         return (
@@ -116,20 +220,33 @@ const CandidateDetail = () => {
     }
 
 
-    if (error) {
+    // =========================================
+    // Candidate Not Available
+    // =========================================
+
+    if (
+        error
+        &&
+        !candidate
+    ) {
 
         return (
 
             <div
                 style={{
-                    padding: "16px",
+                    padding: "18px",
 
                     background:
-                        "rgba(200,50,50,0.15)",
+                        "rgba(220, 60, 60, 0.15)",
 
-                    color: "#ff8c8c",
+                    border:
+                        "1px solid rgba(220, 60, 60, 0.3)",
 
-                    borderRadius: "8px"
+                    borderRadius:
+                        "10px",
+
+                    color:
+                        "#ff8b8b"
                 }}
             >
 
@@ -143,16 +260,34 @@ const CandidateDetail = () => {
 
     return (
 
-        <div>
+        <div
+            style={{
+                width: "100%"
+            }}
+        >
+
+            {/* =============================== */}
+            {/* Back Button */}
+            {/* =============================== */}
 
             <Link
                 to="/candidates"
 
                 style={{
-                    color: "#aab3c4",
+                    display:
+                        "inline-block",
+
+                    color:
+                        "#aab3c4",
 
                     textDecoration:
-                        "none"
+                        "none",
+
+                    marginBottom:
+                        "22px",
+
+                    fontSize:
+                        "14px"
                 }}
             >
 
@@ -161,12 +296,47 @@ const CandidateDetail = () => {
             </Link>
 
 
+            {/* =============================== */}
+            {/* Error Message */}
+            {/* =============================== */}
+
+            {error && (
+
+                <div
+                    style={{
+                        padding:
+                            "14px",
+
+                        marginBottom:
+                            "20px",
+
+                        background:
+                            "rgba(220, 60, 60, 0.15)",
+
+                        border:
+                            "1px solid rgba(220, 60, 60, 0.3)",
+
+                        borderRadius:
+                            "8px",
+
+                        color:
+                            "#ff8b8b"
+                    }}
+                >
+
+                    {error}
+
+                </div>
+
+            )}
+
+
+            {/* =============================== */}
+            {/* Candidate Main Card */}
+            {/* =============================== */}
+
             <div
                 style={{
-                    marginTop: "24px",
-
-                    padding: "28px",
-
                     background:
                         "#11151d",
 
@@ -174,19 +344,34 @@ const CandidateDetail = () => {
                         "1px solid #272d39",
 
                     borderRadius:
-                        "12px"
+                        "12px",
+
+                    padding:
+                        "28px",
+
+                    marginBottom:
+                        "24px"
                 }}
             >
 
+                {/* Header */}
+
                 <div
                     style={{
-                        display: "flex",
+                        display:
+                            "flex",
 
                         justifyContent:
                             "space-between",
 
                         alignItems:
-                            "center"
+                            "center",
+
+                        gap:
+                            "20px",
+
+                        flexWrap:
+                            "wrap"
                     }}
                 >
 
@@ -194,25 +379,43 @@ const CandidateDetail = () => {
 
                         <p
                             style={{
-                                color:
-                                    "#8991a1",
+                                margin:
+                                    "0 0 7px",
 
-                                marginBottom:
-                                    "6px"
+                                color:
+                                    "#7f8999",
+
+                                fontSize:
+                                    "13px",
+
+                                textTransform:
+                                    "uppercase",
+
+                                letterSpacing:
+                                    "1px"
                             }}
                         >
-                            Candidate
+
+                            Anomaly Candidate
+
                         </p>
 
 
                         <h1
                             style={{
-                                margin: 0
+                                margin: 0,
+
+                                color:
+                                    "#ffffff",
+
+                                fontSize:
+                                    "30px"
                             }}
                         >
 
                             {
-                                candidate.objectId
+                                candidate
+                                    ?.objectId
                             }
 
                         </h1>
@@ -222,23 +425,29 @@ const CandidateDetail = () => {
 
                     <PriorityBadge
                         priority={
-                            candidate.priority
+                            candidate
+                                ?.priority
                         }
                     />
 
                 </div>
 
 
+                {/* Candidate Information */}
+
                 <div
                     style={{
-                        display: "grid",
+                        display:
+                            "grid",
 
                         gridTemplateColumns:
-                            "repeat(auto-fit, minmax(180px, 1fr))",
+                            "repeat(auto-fit, minmax(170px, 1fr))",
 
-                        gap: "20px",
+                        gap:
+                            "24px",
 
-                        marginTop: "30px"
+                        marginTop:
+                            "32px"
                     }}
                 >
 
@@ -246,9 +455,26 @@ const CandidateDetail = () => {
                         label="Anomaly Score"
 
                         value={
-                            typeof candidate.anomalyScore === "number"
-                                ? candidate.anomalyScore.toFixed(4)
-                                : candidate.anomalyScore
+                            typeof candidate
+                                ?.anomalyScore
+                                === "number"
+
+                                ? candidate
+                                    .anomalyScore
+                                    .toFixed(4)
+
+                                : candidate
+                                    ?.anomalyScore
+                        }
+                    />
+
+
+                    <InfoItem
+                        label="Priority"
+
+                        value={
+                            candidate
+                                ?.priority
                         }
                     />
 
@@ -257,7 +483,10 @@ const CandidateDetail = () => {
                         label="Status"
 
                         value={
-                            candidate.status
+                            candidate
+                                ?.status
+                            ||
+                            "DETECTED"
                         }
                     />
 
@@ -266,8 +495,13 @@ const CandidateDetail = () => {
                         label="Mission"
 
                         value={
-                            candidate.metadata
+                            candidate
+                                ?.metadata
                                 ?.mission
+                            ||
+                            candidate
+                                ?.metadata
+                                ?.source
                             ||
                             "Unknown"
                         }
@@ -278,7 +512,8 @@ const CandidateDetail = () => {
                         label="RA"
 
                         value={
-                            candidate.metadata
+                            candidate
+                                ?.metadata
                                 ?.ra
                             ??
                             "N/A"
@@ -290,8 +525,37 @@ const CandidateDetail = () => {
                         label="DEC"
 
                         value={
-                            candidate.metadata
+                            candidate
+                                ?.metadata
                                 ?.dec
+                            ??
+                            "N/A"
+                        }
+                    />
+
+
+                    <InfoItem
+                        label="Data Points"
+
+                        value={
+                            candidate
+                                ?.metadata
+                                ?.points
+                            ??
+                            lightCurve.length
+                            ??
+                            "N/A"
+                        }
+                    />
+
+
+                    <InfoItem
+                        label="Total Windows"
+
+                        value={
+                            candidate
+                                ?.metadata
+                                ?.totalWindows
                             ??
                             "N/A"
                         }
@@ -299,12 +563,55 @@ const CandidateDetail = () => {
 
                 </div>
 
+
+                {/* Scientific Note */}
+
+                <div
+                    style={{
+                        marginTop:
+                            "30px",
+
+                        padding:
+                            "16px",
+
+                        background:
+                            "#0d1118",
+
+                        border:
+                            "1px solid #242b36",
+
+                        borderRadius:
+                            "8px",
+
+                        color:
+                            "#8f98a8",
+
+                        lineHeight:
+                            "1.6",
+
+                        fontSize:
+                            "13px"
+                    }}
+                >
+
+                    The anomaly score represents statistical unusualness
+                    detected by the Isolation Forest pipeline. It should
+                    not be interpreted as a calibrated probability of an
+                    astronomical discovery.
+
+                </div>
+
             </div>
 
 
+            {/* =============================== */}
+            {/* Light Curve */}
+            {/* =============================== */}
+
             <div
                 style={{
-                    marginTop: "24px"
+                    marginBottom:
+                        "24px"
                 }}
             >
 
@@ -317,12 +624,12 @@ const CandidateDetail = () => {
             </div>
 
 
+            {/* =============================== */}
+            {/* Metadata */}
+            {/* =============================== */}
+
             <div
                 style={{
-                    marginTop: "24px",
-
-                    padding: "24px",
-
                     background:
                         "#11151d",
 
@@ -330,46 +637,390 @@ const CandidateDetail = () => {
                         "1px solid #272d39",
 
                     borderRadius:
-                        "12px"
+                        "12px",
+
+                    padding:
+                        "24px",
+
+                    marginBottom:
+                        "24px"
                 }}
             >
 
-                <h3>
-                    Scientific Investigation
+                <h3
+                    style={{
+                        margin:
+                            "0 0 18px"
+                    }}
+                >
+
+                    Candidate Metadata
+
                 </h3>
 
 
-                <p
+                {
+                    candidate
+                        ?.metadata
+
+                        ? (
+
+                            <pre
+                                style={{
+                                    margin: 0,
+
+                                    background:
+                                        "#0d1118",
+
+                                    borderRadius:
+                                        "8px",
+
+                                    padding:
+                                        "16px",
+
+                                    color:
+                                        "#aab3c4",
+
+                                    fontSize:
+                                        "12px",
+
+                                    whiteSpace:
+                                        "pre-wrap",
+
+                                    wordBreak:
+                                        "break-word",
+
+                                    overflowX:
+                                        "auto"
+                                }}
+                            >
+
+                                {
+                                    JSON.stringify(
+                                        candidate.metadata,
+                                        null,
+                                        2
+                                    )
+                                }
+
+                            </pre>
+
+                        )
+
+                        : (
+
+                            <p
+                                style={{
+                                    color:
+                                        "#7f8797"
+                                }}
+                            >
+
+                                No candidate metadata available.
+
+                            </p>
+
+                        )
+                }
+
+            </div>
+
+
+            {/* =============================== */}
+            {/* Agentic Investigation */}
+            {/* =============================== */}
+
+            <div
+                style={{
+                    background:
+                        "#11151d",
+
+                    border:
+                        "1px solid #272d39",
+
+                    borderRadius:
+                        "12px",
+
+                    padding:
+                        "28px"
+                }}
+            >
+
+                <div
                     style={{
-                        color: "#8991a1"
+                        display:
+                            "flex",
+
+                        justifyContent:
+                            "space-between",
+
+                        alignItems:
+                            "center",
+
+                        gap:
+                            "24px",
+
+                        flexWrap:
+                            "wrap"
                     }}
                 >
 
-                    Start Fluxor's multi-agent scientific investigation for this candidate.
+                    <div
+                        style={{
+                            maxWidth:
+                                "700px"
+                        }}
+                    >
 
-                </p>
+                        <p
+                            style={{
+                                margin:
+                                    "0 0 7px",
+
+                                color:
+                                    "#7f8999",
+
+                                fontSize:
+                                    "12px",
+
+                                textTransform:
+                                    "uppercase",
+
+                                letterSpacing:
+                                    "1px"
+                            }}
+                        >
+
+                            Agentic AI
+
+                        </p>
 
 
-                <button
-                    disabled
+                        <h2
+                            style={{
+                                margin:
+                                    "0 0 10px",
+
+                                color:
+                                    "#ffffff"
+                            }}
+                        >
+
+                            Scientific Investigation
+
+                        </h2>
+
+
+                        <p
+                            style={{
+                                margin: 0,
+
+                                color:
+                                    "#8992a3",
+
+                                lineHeight:
+                                    "1.6"
+                            }}
+                        >
+
+                            Launch Fluxor's multi-agent investigation to
+                            analyze catalog information, historical
+                            photometry, scientific literature and competing
+                            astrophysical hypotheses.
+
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        onClick={
+                            handleAnalyze
+                        }
+
+                        disabled={
+                            analyzing
+                        }
+
+                        style={{
+                            minWidth:
+                                "210px",
+
+                            padding:
+                                "13px 22px",
+
+                            border:
+                                "none",
+
+                            borderRadius:
+                                "8px",
+
+                            background:
+                                analyzing
+                                    ? "#343b48"
+                                    : "#f4f6f8",
+
+                            color:
+                                analyzing
+                                    ? "#949cab"
+                                    : "#11151d",
+
+                            fontWeight:
+                                "700",
+
+                            cursor:
+                                analyzing
+                                    ? "not-allowed"
+                                    : "pointer",
+
+                            transition:
+                                "0.2s"
+                        }}
+                    >
+
+                        {
+                            analyzing
+                                ? "Running Investigation..."
+                                : "Analyze Candidate"
+                        }
+
+                    </button>
+
+                </div>
+
+
+                {/* Agent Workflow */}
+
+                <div
                     style={{
-                        padding:
-                            "12px 20px",
+                        marginTop:
+                            "26px",
 
-                        border:
-                            "none",
+                        paddingTop:
+                            "22px",
 
-                        borderRadius:
-                            "8px",
-
-                        opacity:
-                            0.5
+                        borderTop:
+                            "1px solid #272d39"
                     }}
                 >
 
-                    Analyze Candidate — Part 4
+                    <p
+                        style={{
+                            color:
+                                "#7f8999",
 
-                </button>
+                            margin:
+                                "0 0 14px",
+
+                            fontSize:
+                                "13px"
+                        }}
+                    >
+
+                        Investigation workflow
+
+                    </p>
+
+
+                    <div
+                        style={{
+                            display:
+                                "flex",
+
+                            alignItems:
+                                "center",
+
+                            flexWrap:
+                                "wrap",
+
+                            gap:
+                                "8px",
+
+                            color:
+                                "#a4adbd",
+
+                            fontSize:
+                                "13px"
+                        }}
+                    >
+
+                        <WorkflowItem
+                            text="Triage"
+                        />
+
+                        <Arrow />
+
+
+                        <WorkflowItem
+                            text="Catalog"
+                        />
+
+                        <Arrow />
+
+
+                        <WorkflowItem
+                            text="Historical"
+                        />
+
+                        <Arrow />
+
+
+                        <WorkflowItem
+                            text="RAG"
+                        />
+
+                        <Arrow />
+
+
+                        <WorkflowItem
+                            text="Reasoning"
+                        />
+
+                        <Arrow />
+
+
+                        <WorkflowItem
+                            text="Confidence Loop"
+                        />
+
+                    </div>
+
+                </div>
+
+
+                {/* Analyzing State */}
+
+                {analyzing && (
+
+                    <div
+                        style={{
+                            marginTop:
+                                "24px",
+
+                            padding:
+                                "16px",
+
+                            border:
+                                "1px solid #303744",
+
+                            borderRadius:
+                                "8px",
+
+                            background:
+                                "#151a22",
+
+                            color:
+                                "#a5afbf"
+                        }}
+                    >
+
+                        Fluxor is running catalog queries, historical
+                        analysis, RAG retrieval and scientific reasoning.
+                        This request may take some time.
+
+                    </div>
+
+                )}
 
             </div>
 
@@ -377,6 +1028,10 @@ const CandidateDetail = () => {
     );
 };
 
+
+// =========================================
+// Reusable Information Item
+// =========================================
 
 const InfoItem = ({
     label,
@@ -389,9 +1044,17 @@ const InfoItem = ({
 
             <span
                 style={{
-                    color: "#858d9c",
+                    display:
+                        "block",
 
-                    fontSize: "13px"
+                    color:
+                        "#7f8999",
+
+                    fontSize:
+                        "13px",
+
+                    marginBottom:
+                        "7px"
                 }}
             >
 
@@ -402,19 +1065,90 @@ const InfoItem = ({
 
             <strong
                 style={{
-                    display: "block",
+                    display:
+                        "block",
 
-                    marginTop: "6px",
+                    color:
+                        "#ffffff",
 
-                    color: "#ffffff"
+                    fontSize:
+                        "15px",
+
+                    wordBreak:
+                        "break-word"
                 }}
             >
 
-                {value}
+                {
+                    value
+                    ??
+                    "N/A"
+                }
 
             </strong>
 
         </div>
+    );
+};
+
+
+// =========================================
+// Workflow Item
+// =========================================
+
+const WorkflowItem = ({
+    text
+}) => {
+
+    return (
+
+        <span
+            style={{
+                padding:
+                    "7px 11px",
+
+                borderRadius:
+                    "20px",
+
+                background:
+                    "#202733",
+
+                border:
+                    "1px solid #303744",
+
+                color:
+                    "#b4bdcc",
+
+                whiteSpace:
+                    "nowrap"
+            }}
+        >
+
+            {text}
+
+        </span>
+    );
+};
+
+
+// =========================================
+// Workflow Arrow
+// =========================================
+
+const Arrow = () => {
+
+    return (
+
+        <span
+            style={{
+                color:
+                    "#5f6877"
+            }}
+        >
+
+            →
+
+        </span>
     );
 };
 

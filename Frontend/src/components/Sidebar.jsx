@@ -11,14 +11,17 @@ const Sidebar = () => {
 
         return {
 
-            padding:
-                "12px 14px",
+            display: "flex",
 
-            textDecoration:
-                "none",
+            alignItems: "center",
 
-            borderRadius:
-                "8px",
+            gap: "12px",
+
+            padding: "12px 14px",
+
+            textDecoration: "none",
+
+            borderRadius: "8px",
 
             color:
                 isActive
@@ -28,9 +31,56 @@ const Sidebar = () => {
             background:
                 isActive
                     ? "#202633"
-                    : "transparent"
+                    : "transparent",
+
+            border:
+                isActive
+                    ? "1px solid #303848"
+                    : "1px solid transparent",
+
+            fontSize: "14px",
+
+            fontWeight:
+                isActive
+                    ? "600"
+                    : "500"
         };
     };
+
+
+    const links = [
+
+        {
+            path: "/dashboard",
+            icon: "◫",
+            label: "Dashboard"
+        },
+
+        {
+            path: "/datasets",
+            icon: "◩",
+            label: "Datasets"
+        },
+
+        {
+            path: "/candidates",
+            icon: "◉",
+            label: "Candidates"
+        },
+
+        {
+            path: "/investigations",
+            icon: "◇",
+            label: "Investigations"
+        },
+
+        {
+            path: "/validations",
+            icon: "✓",
+            label: "Validations"
+        }
+
+    ];
 
 
     return (
@@ -39,35 +89,44 @@ const Sidebar = () => {
             style={{
                 width: "240px",
 
-                minHeight:
-                    "100vh",
+                minHeight: "100vh",
 
-                padding:
-                    "24px 18px",
+                height: "100vh",
 
-                background:
-                    "#0d1017",
+                padding: "24px 18px",
+
+                background: "#0d1017",
 
                 borderRight:
                     "1px solid #242936",
 
-                position:
-                    "fixed",
+                position: "fixed",
 
                 left: 0,
 
-                top: 0
+                top: 0,
+
+                display: "flex",
+
+                flexDirection: "column",
+
+                boxSizing: "border-box",
+
+                zIndex: 100
             }}
         >
 
-            <div>
+            <div
+                style={{
+                    padding: "4px 6px 22px"
+                }}
+            >
 
                 <h2
                     style={{
                         margin: 0,
-
-                        letterSpacing:
-                            "3px"
+                        color: "#ffffff",
+                        letterSpacing: "3px"
                     }}
                 >
 
@@ -79,12 +138,9 @@ const Sidebar = () => {
                 <span
                     style={{
                         display: "block",
-
                         marginTop: "6px",
-
                         color: "#818898",
-
-                        fontSize: "12px"
+                        fontSize: "11px"
                     }}
                 >
 
@@ -98,53 +154,97 @@ const Sidebar = () => {
             <nav
                 style={{
                     display: "flex",
-
-                    flexDirection:
-                        "column",
-
-                    gap: "8px",
-
-                    marginTop:
-                        "40px"
+                    flexDirection: "column",
+                    gap: "7px",
+                    marginTop: "10px"
                 }}
             >
 
-                <NavLink
-                    to="/dashboard"
-                    style={
-                        getLinkStyle
-                    }
+                <p
+                    style={{
+                        margin: "0 0 8px 8px",
+                        color: "#626b7a",
+                        fontSize: "10px",
+                        fontWeight: "700",
+                        letterSpacing: "1.2px"
+                    }}
                 >
 
-                    Dashboard
+                    RESEARCH
 
-                </NavLink>
-
-
-                <NavLink
-                    to="/datasets"
-                    style={
-                        getLinkStyle
-                    }
-                >
-
-                    Datasets
-
-                </NavLink>
+                </p>
 
 
-                <NavLink
-                    to="/candidates"
-                    style={
-                        getLinkStyle
-                    }
-                >
+                {
+                    links.map(
+                        (
+                            link
+                        ) => (
 
-                    Candidates
+                            <NavLink
+                                key={
+                                    link.path
+                                }
 
-                </NavLink>
+                                to={
+                                    link.path
+                                }
+
+                                style={
+                                    getLinkStyle
+                                }
+                            >
+
+                                <span
+                                    style={{
+                                        width: "22px",
+                                        textAlign: "center"
+                                    }}
+                                >
+
+                                    {
+                                        link.icon
+                                    }
+
+                                </span>
+
+
+                                {
+                                    link.label
+                                }
+
+                            </NavLink>
+
+                        )
+                    )
+                }
 
             </nav>
+
+
+            <div
+                style={{
+                    marginTop: "auto",
+                    padding: "18px 10px 5px",
+                    borderTop: "1px solid #222833"
+                }}
+            >
+
+                <p
+                    style={{
+                        margin: 0,
+                        color: "#626b7a",
+                        fontSize: "11px",
+                        lineHeight: "1.6"
+                    }}
+                >
+
+                    Agentic AI for astronomical
+                    transient investigation.
+
+                </p>
+
+            </div>
 
         </aside>
     );

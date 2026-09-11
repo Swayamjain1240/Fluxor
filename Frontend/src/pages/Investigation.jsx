@@ -5,12 +5,17 @@ import {
 
 import {
     Link,
+    useNavigate,
     useParams
 } from "react-router-dom";
 
 import {
     getInvestigationById
 } from "../services/investigationService.js";
+
+import {
+    getReportByInvestigation
+} from "../services/reportService.js";
 
 import Loader from "../components/Loader.jsx";
 
@@ -32,6 +37,10 @@ const Investigation = () => {
     } = useParams();
 
 
+    const navigate =
+        useNavigate();
+
+
     const [
         investigation,
         setInvestigation
@@ -45,16 +54,29 @@ const Investigation = () => {
 
 
     const [
+        openingReport,
+        setOpeningReport
+    ] = useState(false);
+
+
+    const [
         error,
         setError
     ] = useState("");
 
+
+    // =========================================
+    // Load Investigation
+    // =========================================
 
     useEffect(() => {
 
         const loadInvestigation = async () => {
 
             try {
+
+                setError("");
+
 
                 const data =
                     await getInvestigationById(
@@ -69,6 +91,12 @@ const Investigation = () => {
                 );
 
             } catch (error) {
+
+                console.error(
+                    "Investigation loading error:",
+                    error
+                );
+
 
                 setError(
                     error.response
@@ -90,6 +118,72 @@ const Investigation = () => {
     }, [investigationId]);
 
 
+    // =========================================
+    // Open Scientific Report
+    // =========================================
+
+    const handleOpenReport = async () => {
+
+        try {
+
+            setOpeningReport(true);
+
+            setError("");
+
+
+            const data =
+                await getReportByInvestigation(
+                    investigationId
+                );
+
+
+            const report =
+                data.report
+                ||
+                data;
+
+
+            if (!report?._id) {
+
+                throw new Error(
+                    "Scientific report not found"
+                );
+            }
+
+
+            navigate(
+                `/reports/${report._id}`
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Report loading error:",
+                error
+            );
+
+
+            setError(
+                error.response
+                    ?.data
+                    ?.message
+                ||
+                error.message
+                ||
+                "Failed to open scientific report"
+            );
+
+        } finally {
+
+            setOpeningReport(false);
+        }
+    };
+
+
+    // =========================================
+    // Loading
+    // =========================================
+
     if (loading) {
 
         return (
@@ -102,23 +196,33 @@ const Investigation = () => {
     }
 
 
-    if (error) {
+    // =========================================
+    // Error
+    // =========================================
+
+    if (
+        error
+        &&
+        !investigation
+    ) {
 
         return (
 
             <div
                 style={{
-                    padding:
-                        "16px",
+                    padding: "18px",
 
                     background:
-                        "rgba(220,60,60,0.15)",
+                        "rgba(220, 60, 60, 0.15)",
 
-                    color:
-                        "#ff8989",
+                    border:
+                        "1px solid rgba(220, 60, 60, 0.3)",
 
                     borderRadius:
-                        "8px"
+                        "10px",
+
+                    color:
+                        "#ff8989"
                 }}
             >
 
@@ -137,37 +241,92 @@ const Investigation = () => {
         [];
 
 
+    const followupPlan =
+        investigation
+            ?.followupPlan
+        ||
+        [];
+
+
     return (
 
-        <div>
+        <div
+            style={{
+                width: "100%"
+            }}
+        >
+
+            {/* ================================= */}
+            {/* Back */}
+            {/* ================================= */}
 
             <Link
-                to="/candidates"
+                to="/investigations"
 
                 style={{
+                    display:
+                        "inline-block",
+
+                    marginBottom:
+                        "22px",
+
                     color:
                         "#aab3c4",
 
                     textDecoration:
-                        "none"
+                        "none",
+
+                    fontSize:
+                        "14px"
                 }}
             >
 
-                ← Back to Candidates
+                ← Back to Investigations
 
             </Link>
 
 
+            {/* ================================= */}
+            {/* Error Message */}
+            {/* ================================= */}
+
+            {error && (
+
+                <div
+                    style={{
+                        padding:
+                            "14px",
+
+                        marginBottom:
+                            "20px",
+
+                        background:
+                            "rgba(220, 60, 60, 0.15)",
+
+                        border:
+                            "1px solid rgba(220, 60, 60, 0.3)",
+
+                        borderRadius:
+                            "8px",
+
+                        color:
+                            "#ff8989"
+                    }}
+                >
+
+                    {error}
+
+                </div>
+
+            )}
+
+
+            {/* ================================= */}
             {/* Header */}
+            {/* ================================= */}
 
             <div
                 style={{
-                    marginTop:
-                        "22px",
-
-                    marginBottom:
-                        "28px",
-
                     display:
                         "flex",
 
@@ -178,7 +337,13 @@ const Investigation = () => {
                         "center",
 
                     gap:
-                        "20px"
+                        "20px",
+
+                    flexWrap:
+                        "wrap",
+
+                    marginBottom:
+                        "28px"
                 }}
             >
 
@@ -187,10 +352,19 @@ const Investigation = () => {
                     <p
                         style={{
                             margin:
-                                "0 0 8px",
+                                "0 0 7px",
 
                             color:
-                                "#7f8999"
+                                "#7f8999",
+
+                            fontSize:
+                                "12px",
+
+                            textTransform:
+                                "uppercase",
+
+                            letterSpacing:
+                                "1px"
                         }}
                     >
 
@@ -201,12 +375,22 @@ const Investigation = () => {
 
                     <h1
                         style={{
-                            margin: 0
+                            margin: 0,
+
+                            color:
+                                "#ffffff",
+
+                            fontSize:
+                                "30px"
                         }}
                     >
 
                         {
                             investigation
+                                ?.objectId
+                            ||
+                            investigation
+                                ?.candidateId
                                 ?.objectId
                             ||
                             "Fluxor Investigation"
@@ -227,7 +411,9 @@ const Investigation = () => {
             </div>
 
 
-            {/* Confidence + Agent Trace */}
+            {/* ================================= */}
+            {/* Investigation Summary */}
+            {/* ================================= */}
 
             <div
                 style={{
@@ -235,13 +421,88 @@ const Investigation = () => {
                         "grid",
 
                     gridTemplateColumns:
-                        "minmax(280px, 0.7fr) minmax(400px, 1.3fr)",
+                        "repeat(auto-fit, minmax(180px, 1fr))",
+
+                    gap:
+                        "16px",
+
+                    marginBottom:
+                        "24px"
+                }}
+            >
+
+                <SummaryCard
+                    label="Confidence"
+
+                    value={
+                        `${Math.round(
+                            (
+                                investigation
+                                    ?.confidence
+                                ||
+                                0
+                            )
+                            *
+                            100
+                        )}%`
+                    }
+                />
+
+
+                <SummaryCard
+                    label="Iterations"
+
+                    value={
+                        `${
+                            investigation
+                                ?.iterationCount
+                            ||
+                            0
+                        } / 3`
+                    }
+                />
+
+
+                <SummaryCard
+                    label="Status"
+
+                    value={
+                        investigation
+                            ?.status
+                        ||
+                        "UNKNOWN"
+                    }
+                />
+
+
+                <SummaryCard
+                    label="Hypotheses"
+
+                    value={
+                        hypotheses.length
+                    }
+                />
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* Confidence + Agent Trace */}
+            {/* ================================= */}
+
+            <div
+                style={{
+                    display:
+                        "grid",
+
+                    gridTemplateColumns:
+                        "repeat(auto-fit, minmax(320px, 1fr))",
 
                     gap:
                         "22px",
 
                     marginBottom:
-                        "24px"
+                        "28px"
                 }}
             >
 
@@ -271,7 +532,9 @@ const Investigation = () => {
             </div>
 
 
+            {/* ================================= */}
             {/* Hypotheses */}
+            {/* ================================= */}
 
             <div
                 style={{
@@ -280,21 +543,46 @@ const Investigation = () => {
                 }}
             >
 
-                <h2>
-                    Scientific Hypotheses
-                </h2>
-
-
-                <p
+                <div
                     style={{
-                        color:
-                            "#8992a3"
+                        marginBottom:
+                            "18px"
                     }}
                 >
 
-                    Competing explanations generated from catalog, historical and literature evidence.
+                    <h2
+                        style={{
+                            margin:
+                                "0 0 8px",
 
-                </p>
+                            color:
+                                "#ffffff"
+                        }}
+                    >
+
+                        Scientific Hypotheses
+
+                    </h2>
+
+
+                    <p
+                        style={{
+                            margin: 0,
+
+                            color:
+                                "#8992a3",
+
+                            lineHeight:
+                                "1.6"
+                        }}
+                    >
+
+                        Competing astrophysical explanations generated
+                        from catalog, historical and literature evidence.
+
+                    </p>
+
+                </div>
 
 
                 {
@@ -320,7 +608,7 @@ const Investigation = () => {
                                 }}
                             >
 
-                                No hypotheses were generated.
+                                No scientific hypotheses were generated.
 
                             </div>
 
@@ -346,7 +634,7 @@ const Investigation = () => {
 
                                             <HypothesisCard
                                                 key={
-                                                    index
+                                                    `${hypothesis?.name || "hypothesis"}-${index}`
                                                 }
 
                                                 hypothesis={
@@ -370,7 +658,9 @@ const Investigation = () => {
             </div>
 
 
-            {/* Evidence */}
+            {/* ================================= */}
+            {/* Scientific Evidence */}
+            {/* ================================= */}
 
             <EvidenceCard
                 evidence={
@@ -380,7 +670,9 @@ const Investigation = () => {
             />
 
 
-            {/* Follow-up */}
+            {/* ================================= */}
+            {/* Follow-up Recommendations */}
+            {/* ================================= */}
 
             <div
                 style={{
@@ -403,7 +695,11 @@ const Investigation = () => {
 
                 <h3
                     style={{
-                        marginTop: 0
+                        margin:
+                            "0 0 8px",
+
+                        color:
+                            "#ffffff"
                     }}
                 >
 
@@ -412,47 +708,142 @@ const Investigation = () => {
                 </h3>
 
 
+                <p
+                    style={{
+                        margin:
+                            "0 0 18px",
+
+                        color:
+                            "#8992a3",
+
+                        lineHeight:
+                            "1.6"
+                    }}
+                >
+
+                    Suggested next observations or analysis steps based
+                    on the current evidence.
+
+                </p>
+
+
                 {
-                    investigation
-                        ?.followupPlan
-                        ?.length
-                        > 0
+                    followupPlan.length > 0
                         ? (
 
-                            <ul
+                            <div
                                 style={{
-                                    color:
-                                        "#a0a8b7",
+                                    display:
+                                        "flex",
 
-                                    lineHeight:
-                                        "1.8"
+                                    flexDirection:
+                                        "column",
+
+                                    gap:
+                                        "10px"
                                 }}
                             >
 
                                 {
-                                    investigation
-                                        .followupPlan
-                                        .map(
-                                            (
-                                                item,
-                                                index
-                                            ) => (
+                                    followupPlan.map(
+                                        (
+                                            item,
+                                            index
+                                        ) => (
 
-                                                <li
-                                                    key={
-                                                        index
+                                            <div
+                                                key={
+                                                    index
+                                                }
+
+                                                style={{
+                                                    display:
+                                                        "flex",
+
+                                                    gap:
+                                                        "14px",
+
+                                                    alignItems:
+                                                        "flex-start",
+
+                                                    padding:
+                                                        "14px",
+
+                                                    background:
+                                                        "#151a23",
+
+                                                    border:
+                                                        "1px solid #252c37",
+
+                                                    borderRadius:
+                                                        "8px"
+                                                }}
+                                            >
+
+                                                <span
+                                                    style={{
+                                                        minWidth:
+                                                            "28px",
+
+                                                        height:
+                                                            "28px",
+
+                                                        display:
+                                                            "flex",
+
+                                                        alignItems:
+                                                            "center",
+
+                                                        justifyContent:
+                                                            "center",
+
+                                                        borderRadius:
+                                                            "50%",
+
+                                                        background:
+                                                            "#202733",
+
+                                                        color:
+                                                            "#ffffff",
+
+                                                        fontSize:
+                                                            "12px",
+
+                                                        fontWeight:
+                                                            "700"
+                                                    }}
+                                                >
+
+                                                    {
+                                                        index + 1
                                                     }
+
+                                                </span>
+
+
+                                                <p
+                                                    style={{
+                                                        margin: 0,
+
+                                                        color:
+                                                            "#a0a9b8",
+
+                                                        lineHeight:
+                                                            "1.7"
+                                                    }}
                                                 >
 
                                                     {item}
 
-                                                </li>
+                                                </p>
 
-                                            )
+                                            </div>
+
                                         )
+                                    )
                                 }
 
-                            </ul>
+                            </div>
 
                         )
                         : (
@@ -474,7 +865,9 @@ const Investigation = () => {
             </div>
 
 
-            {/* Report */}
+            {/* ================================= */}
+            {/* Scientific Report */}
+            {/* ================================= */}
 
             <div
                 style={{
@@ -482,7 +875,7 @@ const Investigation = () => {
                         "24px",
 
                     padding:
-                        "24px",
+                        "28px",
 
                     background:
                         "#11151d",
@@ -495,29 +888,256 @@ const Investigation = () => {
                 }}
             >
 
-                <h3
+                <div
                     style={{
-                        marginTop: 0
+                        display:
+                            "flex",
+
+                        justifyContent:
+                            "space-between",
+
+                        alignItems:
+                            "center",
+
+                        gap:
+                            "24px",
+
+                        flexWrap:
+                            "wrap"
                     }}
                 >
 
-                    Scientific Report
+                    <div
+                        style={{
+                            maxWidth:
+                                "700px"
+                        }}
+                    >
 
-                </h3>
+                        <p
+                            style={{
+                                margin:
+                                    "0 0 7px",
+
+                                color:
+                                    "#7f8999",
+
+                                fontSize:
+                                    "12px",
+
+                                textTransform:
+                                    "uppercase",
+
+                                letterSpacing:
+                                    "1px"
+                            }}
+                        >
+
+                            Final Research Output
+
+                        </p>
 
 
-                <p
+                        <h2
+                            style={{
+                                margin:
+                                    "0 0 10px",
+
+                                color:
+                                    "#ffffff"
+                            }}
+                        >
+
+                            Scientific Report
+
+                        </h2>
+
+
+                        <p
+                            style={{
+                                margin: 0,
+
+                                color:
+                                    "#8992a3",
+
+                                lineHeight:
+                                    "1.6"
+                            }}
+                        >
+
+                            Open Fluxor's complete AI-generated scientific
+                            report, review the reasoning and submit the
+                            final scientist approval or rejection.
+
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        onClick={
+                            handleOpenReport
+                        }
+
+                        disabled={
+                            openingReport
+                        }
+
+                        style={{
+                            minWidth:
+                                "210px",
+
+                            padding:
+                                "13px 22px",
+
+                            border:
+                                "none",
+
+                            borderRadius:
+                                "8px",
+
+                            background:
+                                openingReport
+                                    ? "#343b48"
+                                    : "#f4f6f8",
+
+                            color:
+                                openingReport
+                                    ? "#939ba9"
+                                    : "#11151d",
+
+                            cursor:
+                                openingReport
+                                    ? "not-allowed"
+                                    : "pointer",
+
+                            fontWeight:
+                                "700",
+
+                            transition:
+                                "0.2s"
+                        }}
+                    >
+
+                        {
+                            openingReport
+                                ? "Opening Report..."
+                                : "View Scientific Report"
+                        }
+
+                    </button>
+
+                </div>
+
+
+                <div
                     style={{
+                        marginTop:
+                            "22px",
+
+                        padding:
+                            "14px",
+
+                        background:
+                            "#0d1118",
+
+                        border:
+                            "1px solid #242b36",
+
+                        borderRadius:
+                            "8px",
+
                         color:
-                            "#8992a3"
+                            "#7f8999",
+
+                        fontSize:
+                            "12px",
+
+                        lineHeight:
+                            "1.6"
                     }}
                 >
 
-                    The complete structured report and scientist validation interface will be available in Part 5.
+                    Fluxor provides AI-assisted scientific analysis.
+                    Final interpretation and validation remain with
+                    the scientist.
 
-                </p>
+                </div>
 
             </div>
+
+        </div>
+    );
+};
+
+
+// =========================================
+// Summary Card
+// =========================================
+
+const SummaryCard = ({
+    label,
+    value
+}) => {
+
+    return (
+
+        <div
+            style={{
+                padding:
+                    "18px",
+
+                background:
+                    "#11151d",
+
+                border:
+                    "1px solid #272d39",
+
+                borderRadius:
+                    "10px"
+            }}
+        >
+
+            <span
+                style={{
+                    display:
+                        "block",
+
+                    marginBottom:
+                        "7px",
+
+                    color:
+                        "#7f8999",
+
+                    fontSize:
+                        "12px",
+
+                    textTransform:
+                        "uppercase",
+
+                    letterSpacing:
+                        "0.6px"
+                }}
+            >
+
+                {label}
+
+            </span>
+
+
+            <strong
+                style={{
+                    color:
+                        "#ffffff",
+
+                    fontSize:
+                        "20px"
+                }}
+            >
+
+                {value}
+
+            </strong>
 
         </div>
     );
