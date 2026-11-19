@@ -1,0 +1,920 @@
+{
+  "track": "track1_controlled_injection",
+  "groundTruth": "synthetic_by_construction",
+  "warning": "Window labels reflect injected signals, not confirmed astronomical anomalies. See evaluation/AUDIT.md section 6.5.",
+  "seed": 42,
+  "config": {
+    "windowSize": 200,
+    "stepSize": 100,
+    "minPoints": 80,
+    "injectionWidth": 100,
+    "disjointStride": 200,
+    "targetPositiveRate": 0.1,
+    "snrRange": [
+      3.0,
+      20.0
+    ],
+    "amplitudeClip": [
+      0.001,
+      0.1
+    ],
+    "injectionClasses": [
+      "T1_flare",
+      "T2_dip",
+      "T3_sinusoid",
+      "T4_offset"
+    ],
+    "splitSizes": {
+      "train": 24,
+      "val": 8,
+      "test": 8
+    },
+    "splitUnit": "object"
+  },
+  "featureNames": [
+    "mean_flux",
+    "std_flux",
+    "median_flux",
+    "amplitude",
+    "iqr",
+    "mad",
+    "slope",
+    "outlier_ratio"
+  ],
+  "targets": [
+    "TIC 115014847",
+    "TIC 139196601",
+    "TIC 139802730",
+    "TIC 140633568",
+    "TIC 141977795",
+    "TIC 144070406",
+    "TIC 150109008",
+    "TIC 161303275",
+    "TIC 176955379",
+    "TIC 200646491",
+    "TIC 206464914",
+    "TIC 206471452",
+    "TIC 206506361",
+    "TIC 219320372",
+    "TIC 220454507",
+    "TIC 231805461",
+    "TIC 235037759",
+    "TIC 238203650",
+    "TIC 269829384",
+    "TIC 270483647",
+    "TIC 270565914",
+    "TIC 270677029",
+    "TIC 279158449",
+    "TIC 29840077",
+    "TIC 317128444",
+    "TIC 318515396",
+    "TIC 325220258",
+    "TIC 326356701",
+    "TIC 326395505",
+    "TIC 327596745",
+    "TIC 364393161",
+    "TIC 370245295",
+    "TIC 381205959",
+    "TIC 392761412",
+    "TIC 394015973",
+    "TIC 394084645",
+    "TIC 394104363",
+    "TIC 410354930",
+    "TIC 52194662",
+    "TIC 52310361"
+  ],
+  "splits": {
+    "train": [
+      "TIC 115014847",
+      "TIC 139802730",
+      "TIC 141977795",
+      "TIC 144070406",
+      "TIC 200646491",
+      "TIC 206471452",
+      "TIC 206506361",
+      "TIC 219320372",
+      "TIC 231805461",
+      "TIC 235037759",
+      "TIC 238203650",
+      "TIC 269829384",
+      "TIC 270483647",
+      "TIC 270565914",
+      "TIC 279158449",
+      "TIC 29840077",
+      "TIC 326356701",
+      "TIC 326395505",
+      "TIC 370245295",
+      "TIC 381205959",
+      "TIC 392761412",
+      "TIC 394084645",
+      "TIC 410354930",
+      "TIC 52194662"
+    ],
+    "val": [
+      "TIC 139196601",
+      "TIC 150109008",
+      "TIC 176955379",
+      "TIC 220454507",
+      "TIC 270677029",
+      "TIC 325220258",
+      "TIC 327596745",
+      "TIC 364393161"
+    ],
+    "test": [
+      "TIC 140633568",
+      "TIC 161303275",
+      "TIC 206464914",
+      "TIC 317128444",
+      "TIC 318515396",
+      "TIC 394015973",
+      "TIC 394104363",
+      "TIC 52310361"
+    ]
+  },
+  "objects": {
+    "TIC 115014847": {
+      "split": "train",
+      "sector": 1,
+      "points": 18206,
+      "windows": 182,
+      "positives": 24,
+      "negatives": 135,
+      "excluded": 23,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 64.401,
+      "seriesChecksum": "ac269bf035603806"
+    },
+    "TIC 139196601": {
+      "split": "val",
+      "sector": 1,
+      "points": 18277,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 130,
+      "excluded": 32,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 64.673,
+      "seriesChecksum": "b628d5a010a79913"
+    },
+    "TIC 139802730": {
+      "split": "train",
+      "sector": 1,
+      "points": 18275,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 130,
+      "excluded": 32,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 62.428,
+      "seriesChecksum": "f7aec5f02c254b05"
+    },
+    "TIC 140633568": {
+      "split": "test",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 67.098,
+      "seriesChecksum": "db1234dfe6db4b26"
+    },
+    "TIC 141977795": {
+      "split": "train",
+      "sector": 1,
+      "points": 18277,
+      "windows": 182,
+      "positives": 22,
+      "negatives": 132,
+      "excluded": 28,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 64.626,
+      "seriesChecksum": "a43bcb57144e991d"
+    },
+    "TIC 144070406": {
+      "split": "train",
+      "sector": 1,
+      "points": 18266,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 67.197,
+      "seriesChecksum": "0b70e96819aef574"
+    },
+    "TIC 150109008": {
+      "split": "val",
+      "sector": 1,
+      "points": 18273,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 130,
+      "excluded": 32,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 73.296,
+      "seriesChecksum": "21ec4b0a2b9be47c"
+    },
+    "TIC 161303275": {
+      "split": "test",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 19,
+      "negatives": 130,
+      "excluded": 33,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 71.269,
+      "seriesChecksum": "bb63e98b98630465"
+    },
+    "TIC 176955379": {
+      "split": "val",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 62.411,
+      "seriesChecksum": "1fc1ba9b7533d312"
+    },
+    "TIC 200646491": {
+      "split": "train",
+      "sector": 1,
+      "points": 18209,
+      "windows": 182,
+      "positives": 23,
+      "negatives": 134,
+      "excluded": 25,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 70.126,
+      "seriesChecksum": "83f19cd134e0a190"
+    },
+    "TIC 206464914": {
+      "split": "test",
+      "sector": 1,
+      "points": 18233,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 76.004,
+      "seriesChecksum": "da1a4ba96c15a88f"
+    },
+    "TIC 206471452": {
+      "split": "train",
+      "sector": 1,
+      "points": 16448,
+      "windows": 164,
+      "positives": 17,
+      "negatives": 118,
+      "excluded": 29,
+      "injections": 16,
+      "injectionClasses": {
+        "T1_flare": 4,
+        "T2_dip": 4,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 60.316,
+      "seriesChecksum": "8c5de17eea62fbc6"
+    },
+    "TIC 206506361": {
+      "split": "train",
+      "sector": 1,
+      "points": 15273,
+      "windows": 152,
+      "positives": 17,
+      "negatives": 109,
+      "excluded": 26,
+      "injections": 15,
+      "injectionClasses": {
+        "T1_flare": 4,
+        "T2_dip": 4,
+        "T3_sinusoid": 4,
+        "T4_offset": 3
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 55.914,
+      "seriesChecksum": "10bf9afafb949033"
+    },
+    "TIC 219320372": {
+      "split": "train",
+      "sector": 1,
+      "points": 18274,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 131,
+      "excluded": 31,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 66.813,
+      "seriesChecksum": "28eb2a19b85e02cc"
+    },
+    "TIC 220454507": {
+      "split": "val",
+      "sector": 1,
+      "points": 18269,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 72.277,
+      "seriesChecksum": "9adfc6419a9dad1c"
+    },
+    "TIC 231805461": {
+      "split": "train",
+      "sector": 1,
+      "points": 18278,
+      "windows": 182,
+      "positives": 23,
+      "negatives": 134,
+      "excluded": 25,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 63.913,
+      "seriesChecksum": "4f4b20608ee88f43"
+    },
+    "TIC 235037759": {
+      "split": "train",
+      "sector": 1,
+      "points": 18269,
+      "windows": 182,
+      "positives": 22,
+      "negatives": 132,
+      "excluded": 28,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": true,
+      "extractionMs": 65.932,
+      "seriesChecksum": "d8d539495ecf0985"
+    },
+    "TIC 238203650": {
+      "split": "train",
+      "sector": 1,
+      "points": 18277,
+      "windows": 182,
+      "positives": 22,
+      "negatives": 132,
+      "excluded": 28,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 65.955,
+      "seriesChecksum": "f2a3ffbc9500e9f9"
+    },
+    "TIC 269829384": {
+      "split": "train",
+      "sector": 1,
+      "points": 17685,
+      "windows": 177,
+      "positives": 25,
+      "negatives": 131,
+      "excluded": 21,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 67.303,
+      "seriesChecksum": "9c2dfd3fe83e6335"
+    },
+    "TIC 270483647": {
+      "split": "train",
+      "sector": 1,
+      "points": 18184,
+      "windows": 182,
+      "positives": 25,
+      "negatives": 135,
+      "excluded": 22,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 67.703,
+      "seriesChecksum": "74ad95036af93e75"
+    },
+    "TIC 270565914": {
+      "split": "train",
+      "sector": 1,
+      "points": 18142,
+      "windows": 181,
+      "positives": 23,
+      "negatives": 133,
+      "excluded": 25,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 75.071,
+      "seriesChecksum": "09ae3243ab8c958b"
+    },
+    "TIC 270677029": {
+      "split": "val",
+      "sector": 1,
+      "points": 18279,
+      "windows": 182,
+      "positives": 22,
+      "negatives": 132,
+      "excluded": 28,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 63.038,
+      "seriesChecksum": "69c3e48b992c2ed1"
+    },
+    "TIC 279158449": {
+      "split": "train",
+      "sector": 1,
+      "points": 18279,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 131,
+      "excluded": 31,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 55.214,
+      "seriesChecksum": "66cfdf88a52ef816"
+    },
+    "TIC 29840077": {
+      "split": "train",
+      "sector": 1,
+      "points": 18181,
+      "windows": 182,
+      "positives": 19,
+      "negatives": 129,
+      "excluded": 34,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": true,
+      "extractionMs": 56.007,
+      "seriesChecksum": "5d0bf952a6bb27e5"
+    },
+    "TIC 317128444": {
+      "split": "test",
+      "sector": 1,
+      "points": 18277,
+      "windows": 182,
+      "positives": 23,
+      "negatives": 133,
+      "excluded": 26,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 57.1,
+      "seriesChecksum": "0933f803dd503f0a"
+    },
+    "TIC 318515396": {
+      "split": "test",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 132,
+      "excluded": 29,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 57.284,
+      "seriesChecksum": "5091f3df19523778"
+    },
+    "TIC 325220258": {
+      "split": "val",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 23,
+      "negatives": 133,
+      "excluded": 26,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 62.744,
+      "seriesChecksum": "433a065d4e3e8a1d"
+    },
+    "TIC 326356701": {
+      "split": "train",
+      "sector": 1,
+      "points": 18227,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 130,
+      "excluded": 32,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 66.916,
+      "seriesChecksum": "d59e277777d9b622"
+    },
+    "TIC 326395505": {
+      "split": "train",
+      "sector": 1,
+      "points": 18169,
+      "windows": 181,
+      "positives": 22,
+      "negatives": 132,
+      "excluded": 27,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 52.588,
+      "seriesChecksum": "49f1f534f07ba39c"
+    },
+    "TIC 327596745": {
+      "split": "val",
+      "sector": 1,
+      "points": 18277,
+      "windows": 182,
+      "positives": 23,
+      "negatives": 133,
+      "excluded": 26,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 52.453,
+      "seriesChecksum": "3e194cae9557cdfa"
+    },
+    "TIC 364393161": {
+      "split": "val",
+      "sector": 1,
+      "points": 18278,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 56.462,
+      "seriesChecksum": "8b591c0abe5fe3bf"
+    },
+    "TIC 370245295": {
+      "split": "train",
+      "sector": 1,
+      "points": 18277,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 132,
+      "excluded": 29,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 53.606,
+      "seriesChecksum": "6c24fc70a8d1ce58"
+    },
+    "TIC 381205959": {
+      "split": "train",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 130,
+      "excluded": 32,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 55.22,
+      "seriesChecksum": "baf72ca6557cfe97"
+    },
+    "TIC 392761412": {
+      "split": "train",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 51.393,
+      "seriesChecksum": "f7894d8800d1611c"
+    },
+    "TIC 394015973": {
+      "split": "test",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 21,
+      "negatives": 131,
+      "excluded": 30,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 51.652,
+      "seriesChecksum": "68cb21b86b56b8de"
+    },
+    "TIC 394084645": {
+      "split": "train",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 131,
+      "excluded": 31,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 55.116,
+      "seriesChecksum": "e40c766a8e60a225"
+    },
+    "TIC 394104363": {
+      "split": "test",
+      "sector": 1,
+      "points": 18276,
+      "windows": 182,
+      "positives": 23,
+      "negatives": 133,
+      "excluded": 26,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 52.675,
+      "seriesChecksum": "a4752428f1ac9bdf"
+    },
+    "TIC 410354930": {
+      "split": "train",
+      "sector": 1,
+      "points": 18278,
+      "windows": 182,
+      "positives": 20,
+      "negatives": 130,
+      "excluded": 32,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 50.195,
+      "seriesChecksum": "1df1ea3ddd37ea5d"
+    },
+    "TIC 52194662": {
+      "split": "train",
+      "sector": 1,
+      "points": 18264,
+      "windows": 182,
+      "positives": 19,
+      "negatives": 129,
+      "excluded": 34,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 60.435,
+      "seriesChecksum": "4b511ddd013a5677"
+    },
+    "TIC 52310361": {
+      "split": "test",
+      "sector": 1,
+      "points": 18275,
+      "windows": 182,
+      "positives": 19,
+      "negatives": 129,
+      "excluded": 34,
+      "injections": 18,
+      "injectionClasses": {
+        "T1_flare": 5,
+        "T2_dip": 5,
+        "T3_sinusoid": 4,
+        "T4_offset": 4
+      },
+      "medianClippedAmplitude": false,
+      "extractionMs": 55.293,
+      "seriesChecksum": "03f65342fffed70f"
+    }
+  },
+  "windowCounts": {
+    "total": 7225,
+    "positive": 845,
+    "negative": 5223,
+    "excluded": 1157,
+    "positiveBySplit": {
+      "train": 506,
+      "val": 171,
+      "test": 168
+    }
+  },
+  "failures": [],
+  "artifacts": {
+    "jsonl": "ml_benchmark.jsonl",
+    "jsonlSha256": "9b8bc8d52de240f825df1f9bdb7d64e04b5b1b0fa81dbccb6c3c4ec504cf5cd5"
+  },
+  "versions": {
+    "python": "3.13.9",
+    "numpy": "2.5.3",
+    "scikit-learn": "1.9.0",
+    "lightkurve": "2.6.0"
+  },
+  "builtAtUtc": "2026-11-19T05:32:34Z",
+  "buildSeconds": 1419.2
+}

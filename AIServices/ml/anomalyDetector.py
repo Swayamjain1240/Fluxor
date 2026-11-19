@@ -3,12 +3,21 @@ from sklearn.ensemble import IsolationForest
 
 class AnomalyDetector:
 
-    def __init__(self,contamination="auto",random_state=42):
+    def __init__(
+        self,
+        contamination="auto",
+        random_state=42,
+        n_estimators=200,
+        max_features=1.0
+    ):
+        # Defaults reproduce the original production configuration exactly;
+        # the extra parameters exist only so evaluation can vary them.
         self.model = IsolationForest(
-            n_estimators=200,
+            n_estimators=n_estimators,
             contamination=contamination,
             random_state=random_state,
-            n_jobs=-1
+            n_jobs=-1,
+            max_features=max_features
         )
 
     def detect(

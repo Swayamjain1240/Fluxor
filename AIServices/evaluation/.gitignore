@@ -1,0 +1,17 @@
+# Large generated artifacts of the evaluation layer.
+#
+# Never committed:
+#   data/cache/            cached light curves (ml)
+#   data/corpus/           corpus PDFs + extracted page text (licensing: local only)
+#   data/ml_benchmark.jsonl  generated injection benchmark
+#   results/               raw run outputs, logs
+#
+# Deliberately tracked:
+#   data/benchmark_manifest.json  frozen benchmark provenance
+#   data/corpus_manifest.json     frozen corpus provenance and licences
+#   data/rag_queries.jsonl        queries + relevance judgments (no source text)
+#   reports/, tests/, scripts
+data/cache/
+data/corpus/
+data/ml_benchmark.jsonl
+results/

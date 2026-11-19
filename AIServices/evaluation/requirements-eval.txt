@@ -1,0 +1,5 @@
+# Development-only dependencies for the evaluation layer.
+# Runtime analysis uses the library versions already pinned in ../requirements.txt.
+# Install with:  python -m pip install -r evaluation/requirements-eval.txt
+
+pytest==9.2.0
