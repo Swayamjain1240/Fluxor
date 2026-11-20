@@ -93,24 +93,8 @@ def objectWindows(objectId: str) -> dict:
     return {
         "objectId": objectId,
         "X": np.asarray(features, dtype=float),
-        "startIndex": [int(window["startIndex"]) for window in windows],
+        "windows": len(windows),
     }
-
-
-def windowAnomalyScores(decisions: np.ndarray) -> np.ndarray:
-    """Same squashing the production detector applies to decision values."""
-
-    return 1.0 / (1.0 + np.exp(8.0 * decisions))
-
-
-def priorityFor(score: float) -> str:
-    """Production score-to-priority mapping, kept only as a descriptive bucket."""
-
-    if score >= 0.80:
-        return "HIGH"
-    if score >= 0.60:
-        return "MEDIUM"
-    return "LOW"
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +152,7 @@ def writeReport(payload: dict) -> None:
     table = "\n".join(
         f"| {row['rank']} | {row['objectId']} | {row['label']} | "
         f"{', '.join(row['gaiaClasses']) or '-'} | {row['Tmag']} | "
-        f"{row['windows']} | {row['objectScore']:.4f} | {row['priority']} |"
+        f"{row['windows']} | {row['objectScore']:.4f} |"
         for row in payload["objects"]
     )
 
@@ -221,11 +205,10 @@ curve in its own arbitrary units, so comparing one object's max score with
 another's was not a meaningful ranking. A single shared fit gives every object
 one origin.
 
-No precision, recall, F1 or confusion table is reported. The production boolean
-flag is derived per curve from `contamination="auto"` and fired on all 40 objects
-in the previous run, so a threshold metric would only restate the configuration.
-`priority` below is the same static score-to-bucket mapping the service uses,
-included for readability, not as a validated decision.
+No precision, recall, F1 or confusion table is reported, and no score-to-priority
+bucket either. The production boolean flag is derived per curve from
+`contamination="auto"` and fired on all 40 objects in the previous run, so a
+threshold metric would only restate the configuration.
 
 ## Provenance
 
@@ -254,8 +237,8 @@ included for readability, not as a validated decision.
 
 ## Per-object results (ranked by score)
 
-| Rank | Object | weakLabel | Gaia classes | Tmag | windows | object score | bucket |
-|---|---|---|---|---|---|---|---|
+| Rank | Object | weakLabel | Gaia classes | Tmag | windows | object score |
+|---|---|---|---|---|---|---|
 {table}
 
 ## Limitations
@@ -323,9 +306,8 @@ def main() -> None:
     rows = []
     for objectId, entry, curve in prepared:
 
-        decisions = model.decision_function(curve["X"])
-        scores = windowAnomalyScores(decisions)
-        best = int(np.argmax(scores))
+        # Production score mapping, applied to the global fit's decision values.
+        scores = 1.0 / (1.0 + np.exp(8.0 * model.decision_function(curve["X"])))
 
         rows.append(
             {
@@ -333,16 +315,14 @@ def main() -> None:
                 "label": int(entry["weakLabel"]),
                 "gaiaClasses": (entry.get("gaia") or {}).get("gaiaClasses", []),
                 "Tmag": round(entry["tic"]["Tmag"], 3) if entry["tic"]["Tmag"] else None,
-                "windows": int(len(scores)),
-                "objectScore": round(float(scores[best]), 6),
-                "topWindowStartIndex": curve["startIndex"][best],
+                "windows": curve["windows"],
+                "objectScore": round(float(np.max(scores)), 6),
             }
         )
 
     rows.sort(key=lambda row: row["objectScore"], reverse=True)
     for rank, row in enumerate(rows, start=1):
         row["rank"] = rank
-        row["priority"] = priorityFor(row["objectScore"])
 
     labels = [row["label"] for row in rows]
     scores = [row["objectScore"] for row in rows]
@@ -376,7 +356,6 @@ def main() -> None:
             "maxFeatures": MAX_FEATURES,
             "randomState": RANDOM_STATE,
             "objectScore": "max window score under the global fit",
-            "thresholdMetrics": None,
         },
         "windowsPooled": int(pooled.shape[0]),
         "fetchedAtUtc": labelPayload["fetchedAtUtc"],
