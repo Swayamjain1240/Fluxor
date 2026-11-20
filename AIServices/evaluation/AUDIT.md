@@ -92,8 +92,11 @@ START -> triageAgent -(conditional)-+-> catalogAgent -> historicalAgent -> ragAg
 - Deterministic tool nodes: `catalogAgent` (SIMBAD, VizieR), `historicalAgent` (MAST via lightkurve), `ragAgent`.
 - Bound: `CONFIDENCE_THRESHOLD=0.72`, `MAX_ITERATIONS=3` (env-overridable). Max 3 reasoning calls, 3 retrievals.
 - Follow-up plan and Markdown report are produced **by `reasoningAgent`**; there is no `followupAgent.py`.
-- `triageAgent`/`reasoningAgent` default to `"openai:gpt-5.4-mini"`, which is not a known OpenAI model ID;
-  behaviour depends entirely on the `LLM_MODEL` value. Must be confirmed before Part 4.
+- `triageAgent`/`reasoningAgent` default to `"openai:gpt-5.4-mini"`, which **is** a valid OpenAI model
+  (default snapshot `gpt-5.4-mini-2026-03-17`, $0.75 / $4.50 per 1M input / output tokens). An earlier version
+  of this audit wrongly called it an unknown model ID; corrected 2026-11-19. The model and snapshot still
+  must be pinned explicitly in the `LLM_MODEL` value for the Part 4 runs, and any reasoning-token usage
+  reported by the provider must be recorded, because it is billed as output.
 
 ### 2.4 Existing evaluation utilities — present, never executed, partly incorrect
 
