@@ -69,6 +69,7 @@ RANDOM_STATE = 42
 
 BOOTSTRAP_SEED = 42
 BOOTSTRAP_ITERATIONS = 2000
+PERMUTATION_ITERATIONS = 20000
 
 
 # ---------------------------------------------------------------------------
@@ -109,36 +110,78 @@ def auc(labels: list[int], scores: list[float]) -> float | None:
     return float(roc_auc_score(labels, scores))
 
 
-def bootstrapAuc(
+def stratifiedBootstrapAuc(
     labels: list[int], scores: list[float], seed: int, iterations: int
 ) -> dict:
-    """Object-level bootstrap; reflects how thin the label set is."""
+    """Bootstrap with positives and negatives resampled separately.
+
+    An object-level bootstrap draws only ~5 positives in a 40-object sample, so
+    it mostly measures which positives happened to be drawn. Resampling each
+    class to its own size keeps every replicate at the observed 5-vs-35 balance
+    and asks the question of interest: how stable is the ranking given this many
+    positives?
+    """
+
+    positives = [s for s, label in zip(scores, labels) if label == 1]
+    negatives = [s for s, label in zip(scores, labels) if label == 0]
+
+    if not positives or not negatives:
+        return {"iterations": 0, "skipped": iterations}
 
     rng = np.random.default_rng(seed)
     values = []
-    skipped = 0
 
     for _ in range(iterations):
-        picks = rng.integers(0, len(labels), len(labels))
-        sampleLabels = [labels[i] for i in picks]
-        sampleScores = [scores[i] for i in picks]
-        value = auc(sampleLabels, sampleScores)
-        if value is None:
-            skipped += 1
-            continue
-        values.append(value)
-
-    if not values:
-        return {"iterations": 0, "skipped": skipped}
+        drawnPositives = rng.choice(positives, size=len(positives), replace=True)
+        drawnNegatives = rng.choice(negatives, size=len(negatives), replace=True)
+        values.append(
+            roc_auc_score(
+                [1] * len(drawnPositives) + [0] * len(drawnNegatives),
+                list(drawnPositives) + list(drawnNegatives),
+            )
+        )
 
     return {
         "iterations": len(values),
-        "skipped": skipped,
+        "skipped": 0,
+        "stratified": True,
         "median": round(float(np.median(values)), 4),
         "ci95": [
             round(float(np.percentile(values, 2.5)), 4),
             round(float(np.percentile(values, 97.5)), 4),
         ],
+    }
+
+
+def permutationPValue(
+    labels: list[int], scores: list[float], seed: int, iterations: int
+) -> dict:
+    """One-sided p-value: how often shuffling labels reaches the observed AUC.
+
+    This is the significance test that matters at this sample size. A bootstrap
+    interval says how well five positives pin down an AUC; it does not say
+    whether that AUC is distinguishable from chance.
+    """
+
+    observed = auc(labels, scores)
+
+    if observed is None:
+        return {"iterations": iterations, "pValue": None, "observed": None}
+
+    labelArray = np.asarray(labels)
+    scoreArray = np.asarray(scores)
+    rng = np.random.default_rng(seed)
+    atLeastAsHigh = 0
+
+    for _ in range(iterations):
+        if roc_auc_score(rng.permutation(labelArray), scoreArray) >= observed:
+            atLeastAsHigh += 1
+
+    return {
+        "iterations": iterations,
+        "observed": round(float(observed), 4),
+        "pValue": round((atLeastAsHigh + 1) / (iterations + 1), 4),
+        "sidedness": "one-sided, >= observed, +1 smoothing",
     }
 
 
@@ -158,13 +201,22 @@ def writeReport(payload: dict) -> None:
 
     aucValue = metrics["rocAuc"]
     aucText = "undefined (one class only)" if aucValue is None else f"{aucValue:.4f}"
-    ci = metrics["bootstrapAuc"].get("ci95")
+    bootstrap = metrics["stratifiedBootstrapAuc"]
+    ci = bootstrap.get("ci95")
     ciText = (
         "not estimable"
         if ci is None
         else f"{ci[0]:.3f} to {ci[1]:.3f} "
-        f"(median {metrics['bootstrapAuc']['median']:.3f}, "
-        f"{metrics['bootstrapAuc']['iterations']} resamples)"
+        f"(median {bootstrap['median']:.3f}, {bootstrap['iterations']} replicates, "
+        f"positives and negatives resampled separately)"
+    )
+
+    permutation = metrics["permutationP"]
+    pText = (
+        "undefined"
+        if permutation.get("pValue") is None
+        else f"{permutation['pValue']:.4f} over {permutation['iterations']} label "
+        f"shuffles (one-sided, +1 smoothing)"
     )
 
     classCount = sum(1 for row in payload["objects"] if row["gaiaClasses"])
@@ -232,8 +284,13 @@ threshold metric would only restate the configuration.
 | Metric | Value |
 |---|---|
 | ROC-AUC, object max window score (global fit) | {aucText} |
-| ROC-AUC bootstrap 95% CI | {ciText} |
+| Permutation p-value (ranking against chance) | {pText} |
+| ROC-AUC stratified bootstrap 95% CI | {ciText} |
 | Leave-one-out sensitivity | {sensitivityText} |
+
+At this sample size the permutation p-value, not the interval, is the test that
+matters: the interval says how well five positives pin down an AUC, while the
+p-value asks whether the ranking is distinguishable from chance at all.
 
 ## Per-object results (ranked by score)
 
@@ -249,11 +306,13 @@ threshold metric would only restate the configuration.
    An assigned variability class exists for only {classCount} of the
    {payload['counts']['positive']} positives; the rest are classified candidates
    with no reported type.
-2. **Very few positives.** {payload['counts']['positive']} of
+2. **Very few positives, and no significance.** {payload['counts']['positive']} of
    {payload['counts']['objects']} objects are positive, so the AUC interval is
    wide and the point estimate is unstable; read it as a direction, not a
-   validated performance figure. The leave-one-out row above shows how much of
-   it rests on a single object.
+   validated performance figure. The permutation test gives
+   p = {permutation['pValue']:.4f}, so the ranking must not be reported as
+   established: with this few positives a single object can carry it, as the
+   leave-one-out row shows.
 3. **Max-over-windows bias.** An object's score is the maximum over its windows,
    so objects with more windows get more draws. Window counts are in the table
    and are not equal.
@@ -363,7 +422,10 @@ def main() -> None:
         "objects": rows,
         "metrics": {
             "rocAuc": auc(labels, scores),
-            "bootstrapAuc": bootstrapAuc(
+            "permutationP": permutationPValue(
+                labels, scores, BOOTSTRAP_SEED, PERMUTATION_ITERATIONS
+            ),
+            "stratifiedBootstrapAuc": stratifiedBootstrapAuc(
                 labels, scores, BOOTSTRAP_SEED, BOOTSTRAP_ITERATIONS
             ),
             "withoutOnlyClassedPositive": sensitivity,
@@ -380,7 +442,8 @@ def main() -> None:
 
     print(
         f"objects={len(rows)} positives={sum(labels)} "
-        f"windows={payload['windowsPooled']} auc={payload['metrics']['rocAuc']}"
+        f"windows={payload['windowsPooled']} auc={payload['metrics']['rocAuc']} "
+        f"p={payload['metrics']['permutationP']['pValue']}"
     )
     print(f"wrote {outPath}")
     print(f"wrote {REPORT}")

@@ -50,8 +50,13 @@ threshold metric would only restate the configuration.
 | Metric | Value |
 |---|---|
 | ROC-AUC, object max window score (global fit) | 0.6114 |
-| ROC-AUC bootstrap 95% CI | 0.316 to 0.895 (median 0.622, 1992 resamples) |
+| Permutation p-value (ranking against chance) | 0.2274 over 20000 label shuffles (one-sided, +1 smoothing) |
+| ROC-AUC stratified bootstrap 95% CI | 0.331 to 0.874 (median 0.611, 2000 replicates, positives and negatives resampled separately) |
 | Leave-one-out sensitivity | dropping TIC 410354930 (the only positive with an assigned class, ranked 1) leaves AUC 0.5143 over 39 objects with 4 positives |
+
+At this sample size the permutation p-value, not the interval, is the test that
+matters: the interval says how well five positives pin down an AUC, while the
+p-value asks whether the ranking is distinguishable from chance at all.
 
 ## Per-object results (ranked by score)
 
@@ -106,11 +111,13 @@ threshold metric would only restate the configuration.
    An assigned variability class exists for only 1 of the
    5 positives; the rest are classified candidates
    with no reported type.
-2. **Very few positives.** 5 of
+2. **Very few positives, and no significance.** 5 of
    40 objects are positive, so the AUC interval is
    wide and the point estimate is unstable; read it as a direction, not a
-   validated performance figure. The leave-one-out row above shows how much of
-   it rests on a single object.
+   validated performance figure. The permutation test gives
+   p = 0.2274, so the ranking must not be reported as
+   established: with this few positives a single object can carry it, as the
+   leave-one-out row shows.
 3. **Max-over-windows bias.** An object's score is the maximum over its windows,
    so objects with more windows get more draws. Window counts are in the table
    and are not equal.

@@ -17,7 +17,11 @@ if str(AI_ROOT) not in sys.path:
     sys.path.insert(0, str(AI_ROOT))
 
 from evaluation.track2.build_labels import labelFromGaia  # noqa: E402
-from evaluation.track2.run_eval import auc, bootstrapAuc  # noqa: E402
+from evaluation.track2.run_eval import (  # noqa: E402
+    auc,
+    permutationPValue,
+    stratifiedBootstrapAuc,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -47,34 +51,73 @@ def test_auc_is_undefined_with_one_class():
 # Bootstrap
 # ---------------------------------------------------------------------------
 
-def test_bootstrap_ci_contains_the_point_estimate_on_a_separable_case():
-    labels = [0, 0, 0, 0, 1, 1, 1, 1]
-    scores = [0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9]
+def test_stratified_bootstrap_keeps_every_class_in_every_replicate():
+    """The point of stratifying: no replicate can lose the positive class."""
 
-    result = bootstrapAuc(labels, scores, seed=0, iterations=200)
+    labels = [1] * 5 + [0] * 35
+    scores = [0.9, 0.8, 0.7, 0.6, 0.5] + [0.8 - 0.02 * i for i in range(35)]
 
-    assert result["iterations"] > 0
-    assert result["ci95"][0] <= 1.0 <= result["ci95"][1]
-    assert result["median"] == pytest.approx(1.0)
+    result = stratifiedBootstrapAuc(labels, scores, seed=0, iterations=200)
+
+    assert result["iterations"] == 200
+    assert result["skipped"] == 0
+    assert result["stratified"] is True
+    assert result["ci95"][0] <= result["median"] <= result["ci95"][1]
 
 
-def test_bootstrap_is_deterministic_for_a_fixed_seed():
+def test_stratified_bootstrap_is_deterministic_for_a_fixed_seed():
     labels = [0, 0, 1, 1, 0, 1, 0, 1]
     scores = [0.2, 0.7, 0.5, 0.9, 0.1, 0.4, 0.3, 0.8]
 
-    first = bootstrapAuc(labels, scores, seed=5, iterations=100)
-    second = bootstrapAuc(labels, scores, seed=5, iterations=100)
+    first = stratifiedBootstrapAuc(labels, scores, seed=5, iterations=100)
+    second = stratifiedBootstrapAuc(labels, scores, seed=5, iterations=100)
 
     assert first == second
 
 
-def test_bootstrap_skips_resamples_with_one_class():
-    """All-identical labels leave every resample single-class."""
-
-    result = bootstrapAuc([1, 1, 1, 1], [0.1, 0.2, 0.3, 0.4], seed=0, iterations=50)
+def test_stratified_bootstrap_returns_nothing_without_both_classes():
+    result = stratifiedBootstrapAuc([1, 1, 1, 1], [0.1, 0.2, 0.3, 0.4], 0, 50)
 
     assert result["iterations"] == 0
     assert result["skipped"] == 50
+
+
+# ---------------------------------------------------------------------------
+# Permutation test
+# ---------------------------------------------------------------------------
+
+def test_permutation_p_reflects_how_often_chance_separates_the_classes():
+    """With 3 positives and 3 negatives, 1 label arrangement in 20 separates them.
+
+    So a perfect ranking on six objects can only reach p ~ 0.05: the test is
+    bounded by the number of distinct label arrangements, not by the AUC.
+    """
+
+    result = permutationPValue([0, 0, 0, 1, 1, 1], [0.1, 0.2, 0.3, 0.7, 0.8, 0.9], 0, 999)
+
+    assert result["observed"] == pytest.approx(1.0)
+    assert 0.03 <= result["pValue"] <= 0.07
+
+
+def test_permutation_p_is_one_when_the_ranking_is_chance():
+    """All scores tied: every shuffling of labels produces the same AUC."""
+
+    result = permutationPValue([0, 1, 0, 1], [0.5, 0.5, 0.5, 0.5], 0, 200)
+
+    assert result["observed"] == pytest.approx(0.5)
+    assert result["pValue"] == pytest.approx(1.0)
+
+
+def test_permutation_is_deterministic_and_handles_one_class():
+    labels = [0, 0, 1, 1, 0, 1, 0, 1]
+    scores = [0.2, 0.7, 0.5, 0.9, 0.1, 0.4, 0.3, 0.8]
+
+    assert permutationPValue(labels, scores, 3, 200) == permutationPValue(
+        labels, scores, 3, 200
+    )
+
+    degenerate = permutationPValue([1, 1, 1], [0.1, 0.2, 0.3], 0, 50)
+    assert degenerate["pValue"] is None
 
 
 # ---------------------------------------------------------------------------
