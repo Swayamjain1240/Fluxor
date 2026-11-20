@@ -104,7 +104,7 @@ START -> triageAgent -(conditional)-+-> catalogAgent -> historicalAgent -> ragAg
 |---|---|---|
 | `evaluation/mlEvaluation.py` | precision, recall, F1, FPR, confusion matrix | No FNR, no ROC-AUC/PR-AUC, no latency, no labels source. No caller. |
 | `evaluation/ragEvaluation.py` | source-level hit/precision/recall/citation coverage | Precision denominator is `|unique retrieved source names|`, collapsing 5 chunk results into a filename set; no per-rank P@K, no nDCG, no MRR, no latency. Its `__main__` block references `stellarFlares.pdf` / `tessArtifacts.pdf`, which do not exist. |
-| `evaluation/agentEvaluation.py` | structural completeness, evidence coverage, iteration-bound compliance | Counts `archived` and `needs_review` as completed, inflating `completionRate`; no timing, no token usage, no tool-call success, no retry accounting. |
+| `evaluation/agentEvaluation.py` | structural completeness, evidence coverage, iteration-bound compliance | `archived` used to be counted as completed, inflating `completionRate`; **fixed 2026-11-20** and covered by `evaluation/tests/test_agent_evaluation.py`. `needs_review` still counts, because that run reached `finalize` and did investigate. No timing, no token usage, no tool-call success, no retry accounting. |
 
 ---
 

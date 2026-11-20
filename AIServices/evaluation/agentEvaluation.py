@@ -37,10 +37,15 @@ def evaluateAgentResult(
     )
 
 
+    # An archived candidate is a finished triage decision, not a finished
+    # investigation: archiveNode never produced hypotheses, literature evidence
+    # or a scientific follow-up plan. Only the two statuses that reached
+    # `finalize` count as completed, otherwise completionRate is inflated by
+    # every candidate the triage agent refused to escalate.
+
     completed = status in [
         "completed",
-        "needs_review",
-        "archived"
+        "needs_review"
     ]
 
 
@@ -314,8 +319,8 @@ def evaluateAgentResult(
     ]
 
 
-    # Archived candidates don't require
-    # hypotheses / RAG / follow-up.
+    # Archived candidates are not scored on hypotheses / RAG / follow-up, which
+    # they cannot produce; they still fail the `completed` check above.
 
     if status != "archived":
 
