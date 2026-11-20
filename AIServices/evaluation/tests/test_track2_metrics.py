@@ -1,6 +1,6 @@
 """Known-value tests for the Track 2 weak-label machinery.
 
-If `rocAuc` is wrong, the reported track-2 AUC is wrong. If `labelFromGaia` is
+If `auc` is wrong, the reported track-2 AUC is wrong. If `labelFromGaia` is
 wrong, the labels themselves are wrong.
 Run: python -m pytest evaluation/tests -q
 """
@@ -17,48 +17,64 @@ if str(AI_ROOT) not in sys.path:
     sys.path.insert(0, str(AI_ROOT))
 
 from evaluation.track2.build_labels import labelFromGaia  # noqa: E402
-from evaluation.track2.run_eval import rocAuc  # noqa: E402
+from evaluation.track2.run_eval import auc, bootstrapAuc  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
-# AUC
+# AUC wrapper
 # ---------------------------------------------------------------------------
 
 def test_auc_perfect_ranking_is_one():
-    assert rocAuc([0, 0, 1, 1], [0.1, 0.2, 0.8, 0.9]) == pytest.approx(1.0)
+    assert auc([0, 0, 1, 1], [0.1, 0.2, 0.8, 0.9]) == pytest.approx(1.0)
 
 
 def test_auc_reversed_ranking_is_zero():
-    assert rocAuc([0, 0, 1, 1], [0.9, 0.8, 0.2, 0.1]) == pytest.approx(0.0)
-
-
-def test_auc_single_positive_matches_rank_position():
-    # Positive scored between the two negatives: one of two pairs is ordered.
-    assert rocAuc([0, 0, 1], [0.1, 0.9, 0.5]) == pytest.approx(0.5)
+    assert auc([0, 0, 1, 1], [0.9, 0.8, 0.2, 0.1]) == pytest.approx(0.0)
 
 
 def test_auc_ties_are_half_credit():
-    assert rocAuc([0, 1], [0.5, 0.5]) == pytest.approx(0.5)
+    assert auc([0, 1], [0.5, 0.5]) == pytest.approx(0.5)
 
 
-def test_auc_matches_sklearn():
-    sklearn = pytest.importorskip("sklearn.metrics")
-    import random
+def test_auc_is_undefined_with_one_class():
+    """Object-level labels can be degenerate; callers must get None, not a crash."""
 
-    rng = random.Random(7)
-    for _ in range(20):
-        labels = [rng.randint(0, 1) for _ in range(12)]
-        scores = [round(rng.random(), 2) for _ in range(12)]
-        if sum(labels) in (0, 12):
-            continue
-        assert rocAuc(labels, scores) == pytest.approx(
-            sklearn.roc_auc_score(labels, scores), abs=1e-12
-        )
+    assert auc([1, 1, 1], [0.1, 0.2, 0.3]) is None
+    assert auc([0, 0], [0.1, 0.2]) is None
 
 
-def test_auc_undefined_with_one_class():
-    assert rocAuc([1, 1, 1], [0.1, 0.2, 0.3]) is None
-    assert rocAuc([0, 0], [0.1, 0.2]) is None
+# ---------------------------------------------------------------------------
+# Bootstrap
+# ---------------------------------------------------------------------------
+
+def test_bootstrap_ci_contains_the_point_estimate_on_a_separable_case():
+    labels = [0, 0, 0, 0, 1, 1, 1, 1]
+    scores = [0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9]
+
+    result = bootstrapAuc(labels, scores, seed=0, iterations=200)
+
+    assert result["iterations"] > 0
+    assert result["ci95"][0] <= 1.0 <= result["ci95"][1]
+    assert result["median"] == pytest.approx(1.0)
+
+
+def test_bootstrap_is_deterministic_for_a_fixed_seed():
+    labels = [0, 0, 1, 1, 0, 1, 0, 1]
+    scores = [0.2, 0.7, 0.5, 0.9, 0.1, 0.4, 0.3, 0.8]
+
+    first = bootstrapAuc(labels, scores, seed=5, iterations=100)
+    second = bootstrapAuc(labels, scores, seed=5, iterations=100)
+
+    assert first == second
+
+
+def test_bootstrap_skips_resamples_with_one_class():
+    """All-identical labels leave every resample single-class."""
+
+    result = bootstrapAuc([1, 1, 1, 1], [0.1, 0.2, 0.3, 0.4], seed=0, iterations=50)
+
+    assert result["iterations"] == 0
+    assert result["skipped"] == 50
 
 
 # ---------------------------------------------------------------------------

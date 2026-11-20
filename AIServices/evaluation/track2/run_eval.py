@@ -2,10 +2,23 @@
 
 TRACK 2 IS A WEAK-LABEL STUDY AND MUST NOT BE MIXED WITH TRACK 1 RESULTS.
 
-Labelling, in one sentence: an object is "positive" when Gaia DR3's
-`vari_summary` places it in at least one variability class, and "negative" when
-it does not; any metric computed on that is a weak-label metric
+Labelling, in one sentence: an object is positive when Gaia DR3's
+`vari_summary` contains it with `in_vari_classification_result = 1`, and
+negative when it does not; any metric computed on that is a weak-label metric
 (`evaluation/track2/build_labels.py` records the provenance).
+
+Why there is no threshold metric here:
+
+  A per-object IsolationForest is fitted to one curve, so its decision values
+  are only meaningful inside that fit -- comparing a max score from star A with
+  one from star B is comparing two arbitrary origins. This study therefore fits
+  **one** IsolationForest over the pooled windows of all objects and ranks
+  objects by their maximum window score under that single fit. A shared origin
+  makes the object scores comparable, which is what a ranking metric needs.
+
+  The production boolean flag is not reported at all: it is defined per curve by
+  `contamination="auto"`, so by construction it fires on essentially every
+  object and carries no object-level information.
 
 Differences from Track 1, all deliberate:
 
@@ -30,13 +43,13 @@ import time
 from pathlib import Path
 
 import numpy as np
+from sklearn.ensemble import IsolationForest
+from sklearn.metrics import roc_auc_score
 
 AI_ROOT = Path(__file__).resolve().parents[2]
 if str(AI_ROOT) not in sys.path:
     sys.path.insert(0, str(AI_ROOT))
 
-from evaluation.mlEvaluation import evaluateMl  # noqa: E402
-from ml.anomalyDetector import AnomalyDetector  # noqa: E402
 from ml.features import extract_window_features  # noqa: E402
 from ml.preprocessing import preprocess_light_curve  # noqa: E402
 
@@ -50,16 +63,20 @@ WINDOW_SIZE = 200
 STEP_SIZE = 100
 MIN_POINTS = 80
 
+N_ESTIMATORS = 200
+MAX_FEATURES = 1.0
+RANDOM_STATE = 42
+
 BOOTSTRAP_SEED = 42
 BOOTSTRAP_ITERATIONS = 2000
 
 
 # ---------------------------------------------------------------------------
-# Per-object detection
+# Features
 # ---------------------------------------------------------------------------
 
-def scoreObject(objectId: str, sector: int) -> dict:
-    """Production detector on one clean curve; object-level summary only."""
+def objectWindows(objectId: str) -> dict:
+    """Window features for one clean curve, in production preprocessing order."""
 
     path = CACHE_DIR / (objectId.replace(" ", "_") + ".npz")
 
@@ -73,53 +90,39 @@ def scoreObject(objectId: str, sector: int) -> dict:
         timeClean, fluxClean, WINDOW_SIZE, STEP_SIZE, MIN_POINTS
     )
 
-    detector = AnomalyDetector()
-    result = detector.detect(features, windows)
-
-    labels = detector.model.predict(features)
-    decision = detector.model.decision_function(features)
-    scores = 1.0 / (1.0 + np.exp(8.0 * decision))
-
     return {
-        "sector": sector,
-        "windows": int(result["totalWindows"]),
-        "flaggedWindows": int(np.sum(labels == -1)),
-        "flaggedFraction": round(float(np.mean(labels == -1)), 4),
-        "isAnomalous": bool(result["isAnomalous"]),
-        "productionScore": float(result["anomalyScore"]),
-        "priority": result["priority"],
-        "maxWindowScore": round(float(np.max(scores)), 6),
+        "objectId": objectId,
+        "X": np.asarray(features, dtype=float),
+        "startIndex": [int(window["startIndex"]) for window in windows],
     }
+
+
+def windowAnomalyScores(decisions: np.ndarray) -> np.ndarray:
+    """Same squashing the production detector applies to decision values."""
+
+    return 1.0 / (1.0 + np.exp(8.0 * decisions))
+
+
+def priorityFor(score: float) -> str:
+    """Production score-to-priority mapping, kept only as a descriptive bucket."""
+
+    if score >= 0.80:
+        return "HIGH"
+    if score >= 0.60:
+        return "MEDIUM"
+    return "LOW"
 
 
 # ---------------------------------------------------------------------------
 # Metrics
 # ---------------------------------------------------------------------------
 
-def rocAuc(labels: list[int], scores: list[float]) -> float | None:
-    """Mann-Whitney AUC with tie handling; None when one class is absent."""
+def auc(labels: list[int], scores: list[float]) -> float | None:
+    """sklearn's ROC-AUC, or None when only one class is present."""
 
-    positives = sum(labels)
-    negatives = len(labels) - positives
-    if positives == 0 or negatives == 0:
+    if len(set(labels)) < 2:
         return None
-
-    order = sorted(range(len(scores)), key=lambda i: scores[i])
-    ranks = [0.0] * len(scores)
-    index = 0
-
-    while index < len(order):
-        end = index
-        while end + 1 < len(order) and scores[order[end + 1]] == scores[order[index]]:
-            end += 1
-        averageRank = (index + end) / 2.0 + 1.0
-        for position in range(index, end + 1):
-            ranks[order[position]] = averageRank
-        index = end + 1
-
-    rankSum = sum(rank for rank, label in zip(ranks, labels) if label == 1)
-
-    return (rankSum - positives * (positives + 1) / 2.0) / (positives * negatives)
+    return float(roc_auc_score(labels, scores))
 
 
 def bootstrapAuc(
@@ -135,7 +138,7 @@ def bootstrapAuc(
         picks = rng.integers(0, len(labels), len(labels))
         sampleLabels = [labels[i] for i in picks]
         sampleScores = [scores[i] for i in picks]
-        value = rocAuc(sampleLabels, sampleScores)
+        value = auc(sampleLabels, sampleScores)
         if value is None:
             skipped += 1
             continue
@@ -163,16 +166,14 @@ def writeReport(payload: dict) -> None:
 
     metrics = payload["metrics"]
     table = "\n".join(
-        f"| {row['objectId']} | {row['label']} | "
+        f"| {row['rank']} | {row['objectId']} | {row['label']} | "
         f"{', '.join(row['gaiaClasses']) or '-'} | {row['Tmag']} | "
-        f"{row['windows']} | {row['flaggedFraction']:.3f} | "
-        f"{row['maxWindowScore']:.3f} | {row['priority']} |"
+        f"{row['windows']} | {row['objectScore']:.4f} | {row['priority']} |"
         for row in payload["objects"]
     )
 
-    confusion = metrics["confusion"]
-    auc = metrics["rocAuc"]
-    aucText = "undefined (one class only)" if auc is None else f"{auc:.4f}"
+    aucValue = metrics["rocAuc"]
+    aucText = "undefined (one class only)" if aucValue is None else f"{aucValue:.4f}"
     ci = metrics["bootstrapAuc"].get("ci95")
     ciText = (
         "not estimable"
@@ -180,6 +181,17 @@ def writeReport(payload: dict) -> None:
         else f"{ci[0]:.3f} to {ci[1]:.3f} "
         f"(median {metrics['bootstrapAuc']['median']:.3f}, "
         f"{metrics['bootstrapAuc']['iterations']} resamples)"
+    )
+
+    classCount = sum(1 for row in payload["objects"] if row["gaiaClasses"])
+
+    sensitivity = payload["metrics"].get("withoutOnlyClassedPositive")
+    sensitivityText = (
+        "not applicable"
+        if not sensitivity
+        else f"dropping {sensitivity['dropped']} (the only positive with an assigned "
+        f"class, ranked {sensitivity['rank']}) leaves AUC {sensitivity['auc']:.4f} "
+        f"over {sensitivity['objects']} objects with {sensitivity['positives']} positives"
     )
 
     REPORT.parent.mkdir(parents=True, exist_ok=True)
@@ -195,15 +207,33 @@ not "known variable of type X". A negative means "not in that catalogue", never
 "not variable". Track 1 (seeded synthetic injection) and Track 2 are separate
 studies; nothing here reads a Track 1 label, split or injected series.
 
+## Scoring
+
+One IsolationForest ({N_ESTIMATORS} trees, `max_features={MAX_FEATURES}`,
+`random_state={RANDOM_STATE}`, `contamination="auto"`) is fitted **once** over
+the pooled windows of all {payload['counts']['objects']} objects
+({payload['windowsPooled']} windows). Each window gets the production score
+mapping `1 / (1 + exp(8 * decision))`, and an object's score is its **maximum
+window score under that single fit**.
+
+This replaces the earlier per-object fits: a per-curve IsolationForest puts each
+curve in its own arbitrary units, so comparing one object's max score with
+another's was not a meaningful ranking. A single shared fit gives every object
+one origin.
+
+No precision, recall, F1 or confusion table is reported. The production boolean
+flag is derived per curve from `contamination="auto"` and fired on all 40 objects
+in the previous run, so a threshold metric would only restate the configuration.
+`priority` below is the same static score-to-bucket mapping the service uses,
+included for readability, not as a validated decision.
+
 ## Provenance
 
 - Objects: the 40 frozen TESS Sector 1 targets from the Track 1 manifest, used
   here only as a fixed, reproducible object list.
 - Light curves: the clean cached TESS 2-minute curves (no injection).
-- Positions/brightness: MAST TIC. Variability classes: Gaia DR3
-  `gaiadr3.vari_summary` via Gaia TAP, fetched {payload['fetchedAtUtc']}.
-- Detector: production `AnomalyDetector` (IsolationForest, 200 trees,
-  contamination `auto`), fitted per curve exactly as the service does.
+- Positions/brightness: MAST TIC. Variability: Gaia DR3 `gaiadr3.vari_summary`
+  via Gaia TAP, fetched {payload['fetchedAtUtc']}.
 
 ## Label counts
 
@@ -212,23 +242,19 @@ studies; nothing here reads a Track 1 label, split or injected series.
 - with a Gaia source id: {payload['counts']['withGaiaId']}
 - present in `vari_summary`: {payload['counts']['inGaiaVariabilityTable']}
 - positive (weak label): {payload['counts']['positive']}
-- of those, with a specific Gaia variability class:
-  {sum(1 for row in payload['objects'] if row['gaiaClasses'])}
+- of those, with a specific Gaia variability class: {classCount}
 
 ## Metrics (object level, n = {payload['counts']['objects']})
 
 | Metric | Value |
 |---|---|
-| ROC-AUC, max window score (production continuous score) | {aucText} |
+| ROC-AUC, object max window score (global fit) | {aucText} |
 | ROC-AUC bootstrap 95% CI | {ciText} |
-| Precision at the production flag | {metrics['precision']:.4f} |
-| Recall at the production flag | {metrics['recall']:.4f} |
-| F1 at the production flag | {metrics['f1Score']:.4f} |
-| Confusion (tp / fp / fn / tn) | {confusion['tp']} / {confusion['fp']} / {confusion['fn']} / {confusion['tn']} |
+| Leave-one-out sensitivity | {sensitivityText} |
 
-## Per-object results
+## Per-object results (ranked by score)
 
-| Object | weakLabel | Gaia classes | Tmag | windows | flagged frac | max score | priority |
+| Rank | Object | weakLabel | Gaia classes | Tmag | windows | object score | bucket |
 |---|---|---|---|---|---|---|---|
 {table}
 
@@ -237,20 +263,24 @@ studies; nothing here reads a Track 1 label, split or injected series.
 1. **Weak labels.** A Gaia variability classification of the star is not
    evidence that any scored window is an anomaly, and catalogue incompleteness
    biases the negatives: many genuine variables are absent from `vari_summary`.
-   Only {sum(1 for row in payload['objects'] if row['gaiaClasses'])} of the
-   {payload['counts']['positive']} positives carry an assigned variability
-   class; the rest are classified candidates with no reported type.
-2. **Very few positives.** {payload['counts']['positive']} of {payload['counts']['objects']}
-   objects are positive, so the AUC interval above is wide and the point
-   estimate is unstable; it should be read as a direction, not a validated
-   performance figure.
-3. **Object-level only.** No window in this study carries a verified label, so
-   nothing here measures localisation (which window is anomalous).
-4. **No human inspection.** No candidate was reviewed by an astronomer for this
+   An assigned variability class exists for only {classCount} of the
+   {payload['counts']['positive']} positives; the rest are classified candidates
+   with no reported type.
+2. **Very few positives.** {payload['counts']['positive']} of
+   {payload['counts']['objects']} objects are positive, so the AUC interval is
+   wide and the point estimate is unstable; read it as a direction, not a
+   validated performance figure. The leave-one-out row above shows how much of
+   it rests on a single object.
+3. **Max-over-windows bias.** An object's score is the maximum over its windows,
+   so objects with more windows get more draws. Window counts are in the table
+   and are not equal.
+4. **Object-level only.** No window here carries a verified label, so nothing
+   measures localisation (which window is anomalous).
+5. **No human inspection.** No candidate was reviewed by an astronomer for this
    track.
-5. **Single sector.** One TESS sector per object; behaviour across sectors is
+6. **Single sector.** One TESS sector per object; behaviour across sectors is
    untested.
-6. **Not comparable with Track 1.** Different unit of analysis, different label
+7. **Not comparable with Track 1.** Different unit of analysis, different label
    source, different (clean) light curves. Track 1 P/R/F1 numbers must never be
    averaged, pooled or compared with these.
 """,
@@ -271,45 +301,93 @@ def main() -> None:
     labelPayload = json.loads(Path(args.labels).read_text(encoding="utf-8"))
     objects = labelPayload["objects"]
 
-    rows = []
+    prepared = []
     for objectId in sorted(objects):
         entry = objects[objectId]
         if not entry.get("tic"):
             print(f"skip {objectId}: {entry.get('error')}")
             continue
+        prepared.append((objectId, entry, objectWindows(objectId)))
 
-        scored = scoreObject(objectId, int(entry["tic"].get("sector", 1)))
+    pooled = np.vstack([item[2]["X"] for item in prepared])
+
+    model = IsolationForest(
+        n_estimators=N_ESTIMATORS,
+        contamination="auto",
+        random_state=RANDOM_STATE,
+        n_jobs=-1,
+        max_features=MAX_FEATURES,
+    )
+    model.fit(pooled)
+
+    rows = []
+    for objectId, entry, curve in prepared:
+
+        decisions = model.decision_function(curve["X"])
+        scores = windowAnomalyScores(decisions)
+        best = int(np.argmax(scores))
+
         rows.append(
             {
                 "objectId": objectId,
                 "label": int(entry["weakLabel"]),
                 "gaiaClasses": (entry.get("gaia") or {}).get("gaiaClasses", []),
                 "Tmag": round(entry["tic"]["Tmag"], 3) if entry["tic"]["Tmag"] else None,
-                **scored,
+                "windows": int(len(scores)),
+                "objectScore": round(float(scores[best]), 6),
+                "topWindowStartIndex": curve["startIndex"][best],
             }
         )
 
-    labels = [row["label"] for row in rows]
-    scores = [row["maxWindowScore"] for row in rows]
-    flags = [1 if row["isAnomalous"] else 0 for row in rows]
+    rows.sort(key=lambda row: row["objectScore"], reverse=True)
+    for rank, row in enumerate(rows, start=1):
+        row["rank"] = rank
+        row["priority"] = priorityFor(row["objectScore"])
 
-    binary = evaluateMl(labels, flags, scores=scores)
+    labels = [row["label"] for row in rows]
+    scores = [row["objectScore"] for row in rows]
+
+    # How much of the ranking rests on the one positive Gaia gave a specific
+    # class to. Reported because it is not visible from the AUC alone.
+    classed = [row for row in rows if row["label"] == 1 and row["gaiaClasses"]]
+    sensitivity = None
+
+    if len(classed) == 1:
+        dropped = classed[0]
+        remaining = [row for row in rows if row is not dropped]
+        value = auc(
+            [row["label"] for row in remaining],
+            [row["objectScore"] for row in remaining],
+        )
+        sensitivity = {
+            "dropped": dropped["objectId"],
+            "rank": dropped["rank"],
+            "objects": len(remaining),
+            "positives": sum(row["label"] for row in remaining),
+            "auc": value,
+        }
 
     payload = {
         "track": "track2_catalogue_proxy",
         "groundTruth": "weak_proxy_not_ground_truth",
+        "scoring": {
+            "fit": "single global IsolationForest over pooled windows of all objects",
+            "nEstimators": N_ESTIMATORS,
+            "maxFeatures": MAX_FEATURES,
+            "randomState": RANDOM_STATE,
+            "objectScore": "max window score under the global fit",
+            "thresholdMetrics": None,
+        },
+        "windowsPooled": int(pooled.shape[0]),
         "fetchedAtUtc": labelPayload["fetchedAtUtc"],
         "counts": labelPayload["counts"],
         "objects": rows,
         "metrics": {
-            "rocAuc": rocAuc(labels, scores),
+            "rocAuc": auc(labels, scores),
             "bootstrapAuc": bootstrapAuc(
                 labels, scores, BOOTSTRAP_SEED, BOOTSTRAP_ITERATIONS
             ),
-            "precision": binary["precision"],
-            "recall": binary["recall"],
-            "f1Score": binary["f1Score"],
-            "confusion": binary["confusionMatrix"],
+            "withoutOnlyClassedPositive": sensitivity,
         },
         "capturedAtUtc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
@@ -323,9 +401,7 @@ def main() -> None:
 
     print(
         f"objects={len(rows)} positives={sum(labels)} "
-        f"auc={payload['metrics']['rocAuc']} "
-        f"precision={payload['metrics']['precision']} "
-        f"recall={payload['metrics']['recall']}"
+        f"windows={payload['windowsPooled']} auc={payload['metrics']['rocAuc']}"
     )
     print(f"wrote {outPath}")
     print(f"wrote {REPORT}")
