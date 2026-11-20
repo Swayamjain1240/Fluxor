@@ -1,0 +1,717 @@
+{
+  "track": "track2_catalogue_proxy",
+  "groundTruth": "weak_proxy_not_ground_truth",
+  "warning": "Labels are an external catalogue classification of the object, not confirmation that any scored window is an anomaly. See evaluation/reports/track2_catalog_proxy.md.",
+  "labelDefinition": "weakLabel = 1 if the source is present in gaiadr3.vari_summary with in_vari_classification_result = 1 (Gaia ran it through variability classification), else 0. Specific in_vari_* classes are recorded when Gaia assigned one but are not required. A 0 means 'not in the catalogue', not 'not variable'.",
+  "sources": {
+    "tic": "MAST TIC (astroquery.mast.Catalogs.query_criteria, catalog=TIC)",
+    "gaia": "Gaia DR3 gaiadr3.vari_summary via Gaia TAP"
+  },
+  "fetchedAtUtc": "2026-11-20T09:44:25Z",
+  "counts": {
+    "objects": 40,
+    "withTic": 40,
+    "withGaiaId": 40,
+    "inGaiaVariabilityTable": 5,
+    "positive": 5
+  },
+  "objects": {
+    "TIC 115014847": {
+      "objectId": "TIC 115014847",
+      "ticId": "115014847",
+      "tic": {
+        "ra": 315.735605711587,
+        "dec": -39.0958020581291,
+        "Tmag": 6.6754,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6774272631163572352",
+        "contratio": 0.0003526011
+      },
+      "error": null,
+      "gaiaSourceId": "6774272631163572352",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 139196601": {
+      "objectId": "TIC 139196601",
+      "ticId": "139196601",
+      "tic": {
+        "ra": 345.452964716916,
+        "dec": -42.8300047504039,
+        "Tmag": 10.5656,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6542644529491991040",
+        "contratio": 0.00139025308
+      },
+      "error": null,
+      "gaiaSourceId": "6542644529491991040",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 139802730": {
+      "objectId": "TIC 139802730",
+      "ticId": "139802730",
+      "tic": {
+        "ra": 324.61281136845,
+        "dec": -50.8120127587728,
+        "Tmag": 9.7422,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6465742212345576064",
+        "contratio": 0.00783328153
+      },
+      "error": null,
+      "gaiaSourceId": "6465742212345576064",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 140633568": {
+      "objectId": "TIC 140633568",
+      "ticId": "140633568",
+      "tic": {
+        "ra": 71.7930138816974,
+        "dec": -73.357963417645,
+        "Tmag": 10.7413,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4652853589200936704",
+        "contratio": 0.02131792
+      },
+      "error": null,
+      "gaiaSourceId": "4652853589200936704",
+      "gaia": {
+        "inVariClassificationResult": 1,
+        "gaiaClasses": []
+      },
+      "weakLabel": 1
+    },
+    "TIC 141977795": {
+      "objectId": "TIC 141977795",
+      "ticId": "141977795",
+      "tic": {
+        "ra": 96.3622611265176,
+        "dec": -76.7101974525455,
+        "Tmag": 11.2772,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "5260443371109400320",
+        "contratio": 0.09051251
+      },
+      "error": null,
+      "gaiaSourceId": "5260443371109400320",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 144070406": {
+      "objectId": "TIC 144070406",
+      "ticId": "144070406",
+      "tic": {
+        "ra": 338.008838516482,
+        "dec": -52.8623204361204,
+        "Tmag": 9.2396,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6510137571296909568",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "6510137571296909568",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 150109008": {
+      "objectId": "TIC 150109008",
+      "ticId": "150109008",
+      "tic": {
+        "ra": 92.5505290856396,
+        "dec": -64.3417981911889,
+        "Tmag": 8.5481,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "5476794587645808128",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "5476794587645808128",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 161303275": {
+      "objectId": "TIC 161303275",
+      "ticId": "161303275",
+      "tic": {
+        "ra": 342.864178461088,
+        "dec": -50.8279481948672,
+        "Tmag": 10.3254,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6513929237145030272",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "6513929237145030272",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 176955379": {
+      "objectId": "TIC 176955379",
+      "ticId": "176955379",
+      "tic": {
+        "ra": 100.777687611124,
+        "dec": -69.2977783227571,
+        "Tmag": 8.9412,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "5279020208473101056",
+        "contratio": 0.0175923165
+      },
+      "error": null,
+      "gaiaSourceId": "5279020208473101056",
+      "gaia": {
+        "inVariClassificationResult": 1,
+        "gaiaClasses": []
+      },
+      "weakLabel": 1
+    },
+    "TIC 200646491": {
+      "objectId": "TIC 200646491",
+      "ticId": "200646491",
+      "tic": {
+        "ra": 320.655817046156,
+        "dec": -46.6457731876967,
+        "Tmag": 9.3115,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6575591395419435392",
+        "contratio": 0.0110316807
+      },
+      "error": null,
+      "gaiaSourceId": "6575591395419435392",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 206464914": {
+      "objectId": "TIC 206464914",
+      "ticId": "206464914",
+      "tic": {
+        "ra": 330.947906430318,
+        "dec": -23.9237954871978,
+        "Tmag": 9.4319,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6812731280158652032",
+        "contratio": 0.009922204
+      },
+      "error": null,
+      "gaiaSourceId": "6812731280158652032",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 206471452": {
+      "objectId": "TIC 206471452",
+      "ticId": "206471452",
+      "tic": {
+        "ra": 331.160877990817,
+        "dec": -18.5389939989721,
+        "Tmag": 13.4725,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6825495441925681920",
+        "contratio": 0.00615671324
+      },
+      "error": null,
+      "gaiaSourceId": "6825495441925681920",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 206506361": {
+      "objectId": "TIC 206506361",
+      "ticId": "206506361",
+      "tic": {
+        "ra": 332.493530702989,
+        "dec": -19.6571066164582,
+        "Tmag": 10.7556,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6822140213474084736",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "6822140213474084736",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 219320372": {
+      "objectId": "TIC 219320372",
+      "ticId": "219320372",
+      "tic": {
+        "ra": 326.476417135206,
+        "dec": -57.7075433254211,
+        "Tmag": 12.4618,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6458880881831118080",
+        "contratio": 0.09500114
+      },
+      "error": null,
+      "gaiaSourceId": "6458880881831118080",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 220454507": {
+      "objectId": "TIC 220454507",
+      "ticId": "220454507",
+      "tic": {
+        "ra": 74.1161848614421,
+        "dec": -57.1720994810365,
+        "Tmag": 9.5533,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4764064727876926976",
+        "contratio": 0.00141278119
+      },
+      "error": null,
+      "gaiaSourceId": "4764064727876926976",
+      "gaia": {
+        "inVariClassificationResult": 1,
+        "gaiaClasses": []
+      },
+      "weakLabel": 1
+    },
+    "TIC 231805461": {
+      "objectId": "TIC 231805461",
+      "ticId": "231805461",
+      "tic": {
+        "ra": 85.1712254222222,
+        "dec": -53.3071860338691,
+        "Tmag": 10.3042,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4768861828389560704",
+        "contratio": 0.03676358
+      },
+      "error": null,
+      "gaiaSourceId": "4768861828389560704",
+      "gaia": {
+        "inVariClassificationResult": 1,
+        "gaiaClasses": []
+      },
+      "weakLabel": 1
+    },
+    "TIC 235037759": {
+      "objectId": "TIC 235037759",
+      "ticId": "235037759",
+      "tic": {
+        "ra": 353.833086271284,
+        "dec": -64.556208301452,
+        "Tmag": 13.1677,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6486330739373982080",
+        "contratio": 2.280834
+      },
+      "error": null,
+      "gaiaSourceId": "6486330739373982080",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 238203650": {
+      "objectId": "TIC 238203650",
+      "ticId": "238203650",
+      "tic": {
+        "ra": 58.18385767048,
+        "dec": -77.8622941362123,
+        "Tmag": 8.218,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4626168549366827264",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "4626168549366827264",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 269829384": {
+      "objectId": "TIC 269829384",
+      "ticId": "269829384",
+      "tic": {
+        "ra": 308.466533746784,
+        "dec": -26.3428707035592,
+        "Tmag": 11.9403,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6800173100728236544",
+        "contratio": 0.216307685
+      },
+      "error": null,
+      "gaiaSourceId": "6800173100728236544",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 270483647": {
+      "objectId": "TIC 270483647",
+      "ticId": "270483647",
+      "tic": {
+        "ra": 324.242011095421,
+        "dec": -35.884144333268,
+        "Tmag": 6.9661,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6589639718048472960",
+        "contratio": 0.0126237078
+      },
+      "error": null,
+      "gaiaSourceId": "6589639718048472960",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 270565914": {
+      "objectId": "TIC 270565914",
+      "ticId": "270565914",
+      "tic": {
+        "ra": 329.143617809164,
+        "dec": -35.9483279745893,
+        "Tmag": 9.8894,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6587070807913451392",
+        "contratio": 0.01012618
+      },
+      "error": null,
+      "gaiaSourceId": "6587070807913451392",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 270677029": {
+      "objectId": "TIC 270677029",
+      "ticId": "270677029",
+      "tic": {
+        "ra": 87.6606186684098,
+        "dec": -53.3282380228928,
+        "Tmag": 8.4532,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4792129487298930432",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "4792129487298930432",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 279158449": {
+      "objectId": "TIC 279158449",
+      "ticId": "279158449",
+      "tic": {
+        "ra": 103.10035665476,
+        "dec": -58.1242914721104,
+        "Tmag": 8.3899,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "5483792566835491712",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "5483792566835491712",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 29840077": {
+      "objectId": "TIC 29840077",
+      "ticId": "29840077",
+      "tic": {
+        "ra": 316.536893159905,
+        "dec": -25.6604751831933,
+        "Tmag": 15.626,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6803823552347267968",
+        "contratio": 0.021132322
+      },
+      "error": null,
+      "gaiaSourceId": "6803823552347267968",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 317128444": {
+      "objectId": "TIC 317128444",
+      "ticId": "317128444",
+      "tic": {
+        "ra": 348.928788677537,
+        "dec": -80.0380858224792,
+        "Tmag": 10.0026,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6351182102982792960",
+        "contratio": 0.00210638018
+      },
+      "error": null,
+      "gaiaSourceId": "6351182102982792960",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 318515396": {
+      "objectId": "TIC 318515396",
+      "ticId": "318515396",
+      "tic": {
+        "ra": 325.742466396403,
+        "dec": -69.1950861356955,
+        "Tmag": 8.5206,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6396501360940019328",
+        "contratio": 0.001508705
+      },
+      "error": null,
+      "gaiaSourceId": "6396501360940019328",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 325220258": {
+      "objectId": "TIC 325220258",
+      "ticId": "325220258",
+      "tic": {
+        "ra": 356.156185881658,
+        "dec": -69.1980462732769,
+        "Tmag": 9.6696,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6387095588719150080",
+        "contratio": 0.002054698
+      },
+      "error": null,
+      "gaiaSourceId": "6387095588719150080",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 326356701": {
+      "objectId": "TIC 326356701",
+      "ticId": "326356701",
+      "tic": {
+        "ra": 325.59698304078,
+        "dec": -21.7626556960439,
+        "Tmag": 8.3387,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6817577824334664320",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "6817577824334664320",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 326395505": {
+      "objectId": "TIC 326395505",
+      "ticId": "326395505",
+      "tic": {
+        "ra": 319.940121424203,
+        "dec": -26.352878325439,
+        "Tmag": 5.8851,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6791154257817212672",
+        "contratio": 0.000126757936
+      },
+      "error": null,
+      "gaiaSourceId": "6791154257817212672",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 327596745": {
+      "objectId": "TIC 327596745",
+      "ticId": "327596745",
+      "tic": {
+        "ra": 326.779714996837,
+        "dec": -66.2889295704525,
+        "Tmag": 9.2053,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6398872354685566208",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "6398872354685566208",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 364393161": {
+      "objectId": "TIC 364393161",
+      "ticId": "364393161",
+      "tic": {
+        "ra": 116.476277643369,
+        "dec": -64.4047538688566,
+        "Tmag": 8.7598,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "5287862068668344704",
+        "contratio": 0.005776615
+      },
+      "error": null,
+      "gaiaSourceId": "5287862068668344704",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 370245295": {
+      "objectId": "TIC 370245295",
+      "ticId": "370245295",
+      "tic": {
+        "ra": 332.32247254241,
+        "dec": -56.3952175333574,
+        "Tmag": 9.6593,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6411962933967407744",
+        "contratio": 0.000862106739
+      },
+      "error": null,
+      "gaiaSourceId": "6411962933967407744",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 381205959": {
+      "objectId": "TIC 381205959",
+      "ticId": "381205959",
+      "tic": {
+        "ra": 30.8260688126852,
+        "dec": -60.7386614511686,
+        "Tmag": 9.2818,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4714319660740391552",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "4714319660740391552",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 392761412": {
+      "objectId": "TIC 392761412",
+      "ticId": "392761412",
+      "tic": {
+        "ra": 327.931128069433,
+        "dec": -73.1695386593848,
+        "Tmag": 8.7068,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6370953383634564224",
+        "contratio": 0.005824014
+      },
+      "error": null,
+      "gaiaSourceId": "6370953383634564224",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 394015973": {
+      "objectId": "TIC 394015973",
+      "ticId": "394015973",
+      "tic": {
+        "ra": 329.94885913154,
+        "dec": -59.5700161333678,
+        "Tmag": 7.9736,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6409694675838847872",
+        "contratio": 0.00340586063
+      },
+      "error": null,
+      "gaiaSourceId": "6409694675838847872",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 394084645": {
+      "objectId": "TIC 394084645",
+      "ticId": "394084645",
+      "tic": {
+        "ra": 337.691288854261,
+        "dec": -61.1681566333742,
+        "Tmag": 10.4126,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6406877276075459072",
+        "contratio": 0.00301502366
+      },
+      "error": null,
+      "gaiaSourceId": "6406877276075459072",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 394104363": {
+      "objectId": "TIC 394104363",
+      "ticId": "394104363",
+      "tic": {
+        "ra": 342.813312122485,
+        "dec": -65.2062996778797,
+        "Tmag": 9.9012,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "6392462682931697536",
+        "contratio": 0.00282842736
+      },
+      "error": null,
+      "gaiaSourceId": "6392462682931697536",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 410354930": {
+      "objectId": "TIC 410354930",
+      "ticId": "410354930",
+      "tic": {
+        "ra": 55.960061116287,
+        "dec": -84.0007956134981,
+        "Tmag": 11.1986,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4615487996494226304",
+        "contratio": 0.04479806
+      },
+      "error": null,
+      "gaiaSourceId": "4615487996494226304",
+      "gaia": {
+        "inVariClassificationResult": 1,
+        "gaiaClasses": [
+          "eclipsing_binary"
+        ]
+      },
+      "weakLabel": 1
+    },
+    "TIC 52194662": {
+      "objectId": "TIC 52194662",
+      "ticId": "52194662",
+      "tic": {
+        "ra": 18.7542688405386,
+        "dec": -68.8189890380658,
+        "Tmag": 6.8051,
+        "objType": "STAR",
+        "typeSrc": "gaia2",
+        "gaiaSourceId": "4692276170589724288",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "4692276170589724288",
+      "gaia": null,
+      "weakLabel": 0
+    },
+    "TIC 52310361": {
+      "objectId": "TIC 52310361",
+      "ticId": "52310361",
+      "tic": {
+        "ra": 22.5097507846652,
+        "dec": -71.8141254067827,
+        "Tmag": 8.3026,
+        "objType": "STAR",
+        "typeSrc": "tmgaia2",
+        "gaiaSourceId": "4687758552190752896",
+        "contratio": NaN
+      },
+      "error": null,
+      "gaiaSourceId": "4687758552190752896",
+      "gaia": null,
+      "weakLabel": 0
+    }
+  }
+}

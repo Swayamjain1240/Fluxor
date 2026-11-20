@@ -237,9 +237,9 @@ reflects that setting rather than detection skill (H3).
 |---|---|
 | L1 | ML pipeline is orphaned; evaluation calls the modules directly rather than through the API |
 | L2 | No real anomaly ground truth exists in the project; Track 1 positives are synthetic |
-| L3 | Track 2 labels are weak/proxy, not confirmed |
+| L3 | Track 2 labels are weak/proxy, not confirmed. Study run: object-level labels from Gaia DR3 `vari_summary` (`in_vari_classification_result`), 5 of 40 objects positive, reported in `evaluation/reports/track2_catalog_proxy.md`; result is a weak-label direction, not validated performance |
 | L4 | RAG corpus is proposed, not yet approved or ingested; all RAG numbers depend on it |
-| L5 | RAG relevance is judged by a single annotator (the agent), so no inter-annotator agreement can be reported; intra-rater re-judgment on a 20% sample will be reported instead |
+| L5 | RAG relevance is judged by a single annotator (the agent), so no inter-annotator agreement can be reported. Intra-rater re-judgment run on 20% of the queries (12 queries, 56 passages): exact agreement 0.696, within one grade 0.946, binary κ 0.532 — stability only, not accuracy. See `evaluation/reports/rag_intra_rater.md` |
 | L6 | Retrieval quality is measured separately from LLM answer quality; no end-to-end answer-faithfulness metric is claimed |
 | L7 | Agent benchmarks require live LLM calls; token accounting depends on provider usage metadata |
 | L8 | README currently overstates implemented capability ("labelled subset of known objects", `followupAgent`, 80–120 papers). To be corrected to measured reality, not updated speculatively |
