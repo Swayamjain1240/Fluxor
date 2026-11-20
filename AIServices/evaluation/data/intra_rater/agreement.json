@@ -1,0 +1,161 @@
+{
+  "passages": 56,
+  "queries": 12,
+  "unjudgedPassages": [],
+  "exactAgreement": 0.6964,
+  "agreementWithinOneGrade": 0.9464,
+  "cohenKappaBinaryRelevant": 0.5321,
+  "quadraticWeightedKappa": 0.6686,
+  "confusionFirstVsSecond": {
+    "0->0": 19,
+    "0->1": 5,
+    "0->2": 2,
+    "1->0": 5,
+    "1->1": 8,
+    "1->2": 2,
+    "2->0": 1,
+    "2->1": 2,
+    "2->2": 12
+  },
+  "gradeDistributionFirst": {
+    "0": 26,
+    "1": 15,
+    "2": 15
+  },
+  "gradeDistributionSecond": {
+    "0": 25,
+    "1": 15,
+    "2": 16
+  },
+  "changes": [
+    {
+      "passageId": "Q17-02",
+      "qid": "Q17",
+      "split": "val",
+      "firstPass": 0,
+      "secondPass": 2
+    },
+    {
+      "passageId": "Q17-04",
+      "qid": "Q17",
+      "split": "val",
+      "firstPass": 0,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q17-05",
+      "qid": "Q17",
+      "split": "val",
+      "firstPass": 2,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q19-01",
+      "qid": "Q19",
+      "split": "test",
+      "firstPass": 0,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q19-04",
+      "qid": "Q19",
+      "split": "test",
+      "firstPass": 1,
+      "secondPass": 2
+    },
+    {
+      "passageId": "Q19-05",
+      "qid": "Q19",
+      "split": "test",
+      "firstPass": 0,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q26-03",
+      "qid": "Q26",
+      "split": "val",
+      "firstPass": 0,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q26-05",
+      "qid": "Q26",
+      "split": "val",
+      "firstPass": 0,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q37-03",
+      "qid": "Q37",
+      "split": "val",
+      "firstPass": 1,
+      "secondPass": 2
+    },
+    {
+      "passageId": "Q37-04",
+      "qid": "Q37",
+      "split": "val",
+      "firstPass": 0,
+      "secondPass": 2
+    },
+    {
+      "passageId": "Q49-01",
+      "qid": "Q49",
+      "split": "test",
+      "firstPass": 1,
+      "secondPass": 0
+    },
+    {
+      "passageId": "Q52-02",
+      "qid": "Q52",
+      "split": "val",
+      "firstPass": 2,
+      "secondPass": 0
+    },
+    {
+      "passageId": "Q56-03",
+      "qid": "Q56",
+      "split": "val",
+      "firstPass": 2,
+      "secondPass": 1
+    },
+    {
+      "passageId": "Q57-02",
+      "qid": "Q57",
+      "split": "val",
+      "firstPass": 1,
+      "secondPass": 0
+    },
+    {
+      "passageId": "Q57-05",
+      "qid": "Q57",
+      "split": "val",
+      "firstPass": 1,
+      "secondPass": 0
+    },
+    {
+      "passageId": "Q58-03",
+      "qid": "Q58",
+      "split": "test",
+      "firstPass": 1,
+      "secondPass": 0
+    },
+    {
+      "passageId": "Q58-05",
+      "qid": "Q58",
+      "split": "test",
+      "firstPass": 1,
+      "secondPass": 0
+    }
+  ],
+  "bySplit": {
+    "test": {
+      "passages": 15,
+      "exactAgreement": 0.6
+    },
+    "val": {
+      "passages": 41,
+      "exactAgreement": 0.7317
+    }
+  }
+}

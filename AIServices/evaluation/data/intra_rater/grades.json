@@ -1,0 +1,534 @@
+{
+  "Q07": {
+    "query": "How does stellar flare activity affect observations of exoplanet atmospheres?",
+    "split": "val",
+    "topic": "flare",
+    "passages": {
+      "Q07-01": {
+        "docId": "D02",
+        "page": 15,
+        "charStart": 230,
+        "charEnd": 670,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q07-02": {
+        "docId": "D03",
+        "page": 1,
+        "charStart": 1867,
+        "charEnd": 2307,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q07-03": {
+        "docId": "D03",
+        "page": 6,
+        "charStart": 3287,
+        "charEnd": 3727,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q07-04": {
+        "docId": "D02",
+        "page": 94,
+        "charStart": 1227,
+        "charEnd": 1302,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q07-05": {
+        "docId": "D05",
+        "page": 2,
+        "charStart": 1321,
+        "charEnd": 1761,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      }
+    }
+  },
+  "Q12": {
+    "query": "What morphology classes are used to describe eclipsing binary light curves?",
+    "split": "val",
+    "topic": "variable",
+    "passages": {
+      "Q12-01": {
+        "docId": "D06",
+        "page": 2,
+        "charStart": 1113,
+        "charEnd": 1553,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q12-02": {
+        "docId": "D06",
+        "page": 4,
+        "charStart": 889,
+        "charEnd": 1329,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q12-03": {
+        "docId": "D03",
+        "page": 2,
+        "charStart": 3916,
+        "charEnd": 4356,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q12-04": {
+        "docId": "D03",
+        "page": 1,
+        "charStart": 4704,
+        "charEnd": 5144,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q12-05": {
+        "docId": "D07",
+        "page": 8,
+        "charStart": 731,
+        "charEnd": 1851,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      }
+    }
+  },
+  "Q17": {
+    "query": "How is a periodic variability signal searched for in a light curve?",
+    "split": "val",
+    "topic": "variable",
+    "passages": {
+      "Q17-01": {
+        "docId": "D04",
+        "page": 11,
+        "charStart": 3484,
+        "charEnd": 4215,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q17-02": {
+        "docId": "D04",
+        "page": 18,
+        "charStart": 4588,
+        "charEnd": 5198,
+        "firstPassGrade": 0,
+        "secondPassGrade": 2
+      },
+      "Q17-03": {
+        "docId": "D06",
+        "page": 5,
+        "charStart": 916,
+        "charEnd": 1592,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q17-04": {
+        "docId": "D03",
+        "page": 9,
+        "charStart": 590,
+        "charEnd": 1247,
+        "firstPassGrade": 0,
+        "secondPassGrade": 1
+      },
+      "Q17-05": {
+        "docId": "D03",
+        "page": 8,
+        "charStart": 2889,
+        "charEnd": 3329,
+        "firstPassGrade": 2,
+        "secondPassGrade": 1
+      }
+    }
+  },
+  "Q19": {
+    "query": "How is the completeness of a variability catalogue estimated?",
+    "split": "test",
+    "topic": "variable",
+    "passages": {
+      "Q19-01": {
+        "docId": "D05",
+        "page": 9,
+        "charStart": 262,
+        "charEnd": 702,
+        "firstPassGrade": 0,
+        "secondPassGrade": 1
+      },
+      "Q19-02": {
+        "docId": "D05",
+        "page": 8,
+        "charStart": 3632,
+        "charEnd": 4072,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q19-03": {
+        "docId": "D01",
+        "page": 65,
+        "charStart": 332,
+        "charEnd": 772,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q19-04": {
+        "docId": "D04",
+        "page": 15,
+        "charStart": 965,
+        "charEnd": 1405,
+        "firstPassGrade": 1,
+        "secondPassGrade": 2
+      },
+      "Q19-05": {
+        "docId": "D04",
+        "page": 16,
+        "charStart": 19,
+        "charEnd": 459,
+        "firstPassGrade": 0,
+        "secondPassGrade": 1
+      }
+    }
+  },
+  "Q26": {
+    "query": "How are supernova candidates reported and followed up?",
+    "split": "val",
+    "topic": "transient",
+    "passages": {
+      "Q26-01": {
+        "docId": "D12",
+        "page": 2,
+        "charStart": 63,
+        "charEnd": 503,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q26-02": {
+        "docId": "D08",
+        "page": 1,
+        "charStart": 1726,
+        "charEnd": 2502,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q26-03": {
+        "docId": "D08",
+        "page": 2,
+        "charStart": 2226,
+        "charEnd": 2886,
+        "firstPassGrade": 0,
+        "secondPassGrade": 1
+      },
+      "Q26-04": {
+        "docId": "D11",
+        "page": 2,
+        "charStart": 46,
+        "charEnd": 486,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q26-05": {
+        "docId": "D11",
+        "page": 3,
+        "charStart": 3096,
+        "charEnd": 3536,
+        "firstPassGrade": 0,
+        "secondPassGrade": 1
+      }
+    }
+  },
+  "Q36": {
+    "query": "What is a causal pixel model and how is it fitted?",
+    "split": "val",
+    "topic": "artifact",
+    "passages": {
+      "Q36-01": {
+        "docId": "D08",
+        "page": 5,
+        "charStart": 2202,
+        "charEnd": 2642,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      }
+    }
+  },
+  "Q37": {
+    "query": "How is photometric precision characterised for a transit survey?",
+    "split": "val",
+    "topic": "artifact",
+    "passages": {
+      "Q37-01": {
+        "docId": "D06",
+        "page": 14,
+        "charStart": 1545,
+        "charEnd": 2316,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q37-02": {
+        "docId": "D08",
+        "page": 18,
+        "charStart": 2931,
+        "charEnd": 3040,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q37-03": {
+        "docId": "D01",
+        "page": 54,
+        "charStart": 44,
+        "charEnd": 762,
+        "firstPassGrade": 1,
+        "secondPassGrade": 2
+      },
+      "Q37-04": {
+        "docId": "D06",
+        "page": 16,
+        "charStart": 0,
+        "charEnd": 1068,
+        "firstPassGrade": 0,
+        "secondPassGrade": 2
+      },
+      "Q37-05": {
+        "docId": "D02",
+        "page": 86,
+        "charStart": 3175,
+        "charEnd": 3638,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      }
+    }
+  },
+  "Q49": {
+    "query": "How are light curves from different observing sectors combined?",
+    "split": "test",
+    "topic": "lightcurve",
+    "passages": {
+      "Q49-01": {
+        "docId": "D04",
+        "page": 3,
+        "charStart": 881,
+        "charEnd": 1695,
+        "firstPassGrade": 1,
+        "secondPassGrade": 0
+      },
+      "Q49-02": {
+        "docId": "D06",
+        "page": 14,
+        "charStart": 1524,
+        "charEnd": 2289,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q49-03": {
+        "docId": "D01",
+        "page": 11,
+        "charStart": 1611,
+        "charEnd": 2051,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q49-04": {
+        "docId": "D06",
+        "page": 3,
+        "charStart": 4137,
+        "charEnd": 4969,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q49-05": {
+        "docId": "D01",
+        "page": 54,
+        "charStart": 23,
+        "charEnd": 592,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      }
+    }
+  },
+  "Q52": {
+    "query": "What is the pixel scale and field of view of the TESS cameras?",
+    "split": "val",
+    "topic": "mission",
+    "passages": {
+      "Q52-01": {
+        "docId": "D01",
+        "page": 11,
+        "charStart": 806,
+        "charEnd": 1246,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q52-02": {
+        "docId": "D02",
+        "page": 29,
+        "charStart": 201,
+        "charEnd": 1005,
+        "firstPassGrade": 2,
+        "secondPassGrade": 0
+      },
+      "Q52-03": {
+        "docId": "D01",
+        "page": 13,
+        "charStart": 1273,
+        "charEnd": 1761,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q52-04": {
+        "docId": "D02",
+        "page": 4,
+        "charStart": 1340,
+        "charEnd": 1780,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q52-05": {
+        "docId": "D04",
+        "page": 3,
+        "charStart": 835,
+        "charEnd": 1483,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      }
+    }
+  },
+  "Q56": {
+    "query": "What is the difference between full-frame images and target pixel files?",
+    "split": "val",
+    "topic": "mission",
+    "passages": {
+      "Q56-01": {
+        "docId": "D01",
+        "page": 17,
+        "charStart": 1321,
+        "charEnd": 2141,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q56-02": {
+        "docId": "D02",
+        "page": 69,
+        "charStart": 1021,
+        "charEnd": 1461,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q56-03": {
+        "docId": "D10",
+        "page": 3,
+        "charStart": 1351,
+        "charEnd": 1916,
+        "firstPassGrade": 2,
+        "secondPassGrade": 1
+      },
+      "Q56-04": {
+        "docId": "D02",
+        "page": 42,
+        "charStart": 60,
+        "charEnd": 500,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q56-05": {
+        "docId": "D01",
+        "page": 52,
+        "charStart": 1719,
+        "charEnd": 2159,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      }
+    }
+  },
+  "Q57": {
+    "query": "How does TESS select which stars to observe at two-minute cadence?",
+    "split": "val",
+    "topic": "mission",
+    "passages": {
+      "Q57-01": {
+        "docId": "D03",
+        "page": 1,
+        "charStart": 556,
+        "charEnd": 996,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q57-02": {
+        "docId": "D03",
+        "page": 2,
+        "charStart": 2792,
+        "charEnd": 3232,
+        "firstPassGrade": 1,
+        "secondPassGrade": 0
+      },
+      "Q57-03": {
+        "docId": "D01",
+        "page": 17,
+        "charStart": 250,
+        "charEnd": 1333,
+        "firstPassGrade": 2,
+        "secondPassGrade": 2
+      },
+      "Q57-04": {
+        "docId": "D04",
+        "page": 1,
+        "charStart": 850,
+        "charEnd": 1290,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q57-05": {
+        "docId": "D01",
+        "page": 29,
+        "charStart": 1681,
+        "charEnd": 2121,
+        "firstPassGrade": 1,
+        "secondPassGrade": 0
+      }
+    }
+  },
+  "Q58": {
+    "query": "What limits the photometric sensitivity for faint targets?",
+    "split": "test",
+    "topic": "mission",
+    "passages": {
+      "Q58-01": {
+        "docId": "D08",
+        "page": 13,
+        "charStart": 945,
+        "charEnd": 1553,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q58-02": {
+        "docId": "D02",
+        "page": 36,
+        "charStart": 1504,
+        "charEnd": 1944,
+        "firstPassGrade": 1,
+        "secondPassGrade": 1
+      },
+      "Q58-03": {
+        "docId": "D01",
+        "page": 22,
+        "charStart": 384,
+        "charEnd": 824,
+        "firstPassGrade": 1,
+        "secondPassGrade": 0
+      },
+      "Q58-04": {
+        "docId": "D01",
+        "page": 26,
+        "charStart": 673,
+        "charEnd": 1241,
+        "firstPassGrade": 0,
+        "secondPassGrade": 0
+      },
+      "Q58-05": {
+        "docId": "D02",
+        "page": 57,
+        "charStart": 331,
+        "charEnd": 771,
+        "firstPassGrade": 1,
+        "secondPassGrade": 0
+      }
+    }
+  }
+}
