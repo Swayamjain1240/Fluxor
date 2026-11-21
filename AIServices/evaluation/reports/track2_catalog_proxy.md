@@ -30,9 +30,8 @@ threshold metric would only restate the configuration.
 
 ## Provenance
 
-- Objects: the 40 frozen TESS Sector 1 targets from the Track 1 manifest, used
-  here only as a fixed, reproducible object list.
-- Light curves: the clean cached TESS 2-minute curves (no injection).
+- Objects: the 40 frozen TESS Sector 1 targets from the Track 1 manifest, used here only as a fixed, reproducible object list
+- Light curves: clean TESS 2-minute curves (no injection).
 - Positions/brightness: MAST TIC. Variability: Gaia DR3 `gaiadr3.vari_summary`
   via Gaia TAP, fetched 2026-11-20T09:44:25Z.
 

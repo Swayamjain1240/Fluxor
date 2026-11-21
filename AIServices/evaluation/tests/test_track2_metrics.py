@@ -16,6 +16,10 @@ AI_ROOT = Path(__file__).resolve().parents[2]
 if str(AI_ROOT) not in sys.path:
     sys.path.insert(0, str(AI_ROOT))
 
+from evaluation.track2.build_enriched_targets import (  # noqa: E402
+    magnitudeBands,
+    matchNegatives,
+)
 from evaluation.track2.build_labels import labelFromGaia  # noqa: E402
 from evaluation.track2.run_eval import (  # noqa: E402
     auc,
@@ -145,3 +149,46 @@ def test_specific_class_is_positive():
         )
         == 1
     )
+
+
+# ---------------------------------------------------------------------------
+# Enriched sampling: band pagination and magnitude matching
+# ---------------------------------------------------------------------------
+
+def test_magnitude_bands_are_contiguous_and_cover_the_range():
+    """Bands replace cursor paging, so they must tile the range exactly."""
+
+    bands = magnitudeBands(4)
+
+    assert len(bands) == 4
+    assert bands[0][0] == 8.0
+    assert bands[-1][1] == 13.0
+    for (_, high), (nextLow, _) in zip(bands, bands[1:]):
+        assert high == pytest.approx(nextLow)
+    assert sum(high - low for low, high in bands) == pytest.approx(5.0)
+
+
+def test_matching_gives_each_positive_one_control_within_tolerance():
+    positives = [
+        {"sourceId": "p1", "gMag": 9.0, "classes": ["eclipsing_binary"], "label": 1},
+        {"sourceId": "p2", "gMag": 10.0, "classes": ["rrlyrae"], "label": 1},
+    ]
+    controls = [
+        {"sourceId": "c1", "gMag": 9.1, "classes": [], "label": 0},
+        {"sourceId": "c2", "gMag": 10.05, "classes": [], "label": 0},
+    ]
+
+    matched = matchNegatives(positives, controls)
+
+    assert len(matched) == 2
+    assert [row["sourceId"] for row in matched] == ["c1", "c2"]
+    assert all(row["label"] == 0 for row in matched)
+    # A control is used once, so positives and controls stay disjoint.
+    assert not {row["sourceId"] for row in matched} & {p["sourceId"] for p in positives}
+
+
+def test_matching_skips_controls_outside_the_magnitude_tolerance():
+    positives = [{"sourceId": "p1", "gMag": 9.0, "classes": ["x"], "label": 1}]
+    controls = [{"sourceId": "c1", "gMag": 11.0, "classes": [], "label": 0}]
+
+    assert matchNegatives(positives, controls) == []

@@ -15,3 +15,11 @@ data/cache/
 data/corpus/
 data/ml_benchmark.jsonl
 results/
+
+# Track 2 enriched dataset: derived from live Gaia/MAST queries, not reproducible
+# offline, and irrelevant to the committed study. Regenerate with
+#   python evaluation/track2/build_enriched_targets.py --per-class 8
+# (curve cache is kept locally so reruns do not re-download).
+track2/enriched/cache/
+track2/enriched/labels.json
+track2/enriched/*.tmp.json

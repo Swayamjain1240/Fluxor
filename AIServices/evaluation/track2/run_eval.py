@@ -76,10 +76,10 @@ PERMUTATION_ITERATIONS = 20000
 # Features
 # ---------------------------------------------------------------------------
 
-def objectWindows(objectId: str) -> dict:
+def objectWindows(objectId: str, cacheDir: Path) -> dict:
     """Window features for one clean curve, in production preprocessing order."""
 
-    path = CACHE_DIR / (objectId.replace(" ", "_") + ".npz")
+    path = cacheDir / (objectId.replace(" ", "_") + ".npz")
 
     with np.load(path) as data:
         timeArr = np.asarray(data["time"], dtype=float)
@@ -189,7 +189,7 @@ def permutationPValue(
 # Report
 # ---------------------------------------------------------------------------
 
-def writeReport(payload: dict) -> None:
+def writeReport(payload: dict, report: Path) -> None:
 
     metrics = payload["metrics"]
     table = "\n".join(
@@ -230,8 +230,8 @@ def writeReport(payload: dict) -> None:
         f"over {sensitivity['objects']} objects with {sensitivity['positives']} positives"
     )
 
-    REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(
         f"""# Track 2 — catalogue proxy labels (weak labels)
 
 **These labels are not ground truth.** An object is positive when Gaia DR3's
@@ -264,9 +264,8 @@ threshold metric would only restate the configuration.
 
 ## Provenance
 
-- Objects: the 40 frozen TESS Sector 1 targets from the Track 1 manifest, used
-  here only as a fixed, reproducible object list.
-- Light curves: the clean cached TESS 2-minute curves (no injection).
+- Objects: {payload['provenance']}
+- Light curves: clean TESS 2-minute curves (no injection).
 - Positions/brightness: MAST TIC. Variability: Gaia DR3 `gaiadr3.vari_summary`
   via Gaia TAP, fetched {payload['fetchedAtUtc']}.
 
@@ -338,10 +337,21 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--labels", default=str(LABELS))
+    parser.add_argument("--cache", default=str(CACHE_DIR))
+    parser.add_argument("--report", default=str(REPORT))
+    parser.add_argument(
+        "--provenance",
+        default="the 40 frozen TESS Sector 1 targets from the Track 1 manifest, "
+        "used here only as a fixed, reproducible object list",
+    )
     args = parser.parse_args()
+
+    cacheDir = Path(args.cache)
+    report = Path(args.report)
 
     labelPayload = json.loads(Path(args.labels).read_text(encoding="utf-8"))
     objects = labelPayload["objects"]
+    payloadTime = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
     prepared = []
     for objectId in sorted(objects):
@@ -349,7 +359,7 @@ def main() -> None:
         if not entry.get("tic"):
             print(f"skip {objectId}: {entry.get('error')}")
             continue
-        prepared.append((objectId, entry, objectWindows(objectId)))
+        prepared.append((objectId, entry, objectWindows(objectId, cacheDir)))
 
     pooled = np.vstack([item[2]["X"] for item in prepared])
 
@@ -417,7 +427,8 @@ def main() -> None:
             "objectScore": "max window score under the global fit",
         },
         "windowsPooled": int(pooled.shape[0]),
-        "fetchedAtUtc": labelPayload["fetchedAtUtc"],
+        "provenance": args.provenance,
+        "fetchedAtUtc": labelPayload.get("fetchedAtUtc", payloadTime),
         "counts": labelPayload["counts"],
         "objects": rows,
         "metrics": {
@@ -435,10 +446,10 @@ def main() -> None:
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-    outPath = RESULTS_DIR / f"track2_catalog_{stamp}.json"
+    outPath = RESULTS_DIR / f"{report.stem}_{stamp}.json"
     outPath.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
-    writeReport(payload)
+    writeReport(payload, report)
 
     print(
         f"objects={len(rows)} positives={sum(labels)} "
@@ -446,7 +457,7 @@ def main() -> None:
         f"p={payload['metrics']['permutationP']['pValue']}"
     )
     print(f"wrote {outPath}")
-    print(f"wrote {REPORT}")
+    print(f"wrote {report}")
 
 
 if __name__ == "__main__":
