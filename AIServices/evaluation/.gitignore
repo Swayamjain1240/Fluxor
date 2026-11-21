@@ -22,4 +22,5 @@ results/
 # (curve cache is kept locally so reruns do not re-download).
 track2/enriched/cache/
 track2/enriched/labels.json
+track2/enriched/labels_*.json
 track2/enriched/*.tmp.json
