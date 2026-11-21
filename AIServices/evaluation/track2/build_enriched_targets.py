@@ -37,6 +37,7 @@ import argparse
 import json
 import os
 import sys
+import threading
 import time
 import warnings
 from pathlib import Path
@@ -56,6 +57,8 @@ FIELD_RADIUS_DEG = 15.0
 MAG_RANGE = (8.0, 13.0)
 MAG_MATCH_TOLERANCE = 0.35
 TIC_MATCH_ARCSEC = 3.0
+TIC_TIMEOUT_S = 120
+CURVE_TIMEOUT_S = 300
 
 CLASS_PRIORITY = (
     "in_vari_eclipsing_binary",
@@ -65,9 +68,6 @@ CLASS_PRIORITY = (
     "in_vari_long_period_variable",
     "in_vari_short_timescale",
 )
-
-# Fetched with +1 so a full page is detectable as truncation rather than silent.
-POOL_LIMIT = 6000
 
 GAIA_FIELDS = ", ".join("v." + name for name in CLASS_PRIORITY)
 
@@ -99,55 +99,85 @@ def launchWithRetry(Gaia, query: str, attempts: int = 3):
 # Gaia pools
 # ---------------------------------------------------------------------------
 
-def fetchVariabilityPool() -> dict:
+def fetchVariabilityPool(bands: int, pageSize: int) -> dict:
     """Gaia sources in the field with per-class flags (may carry none).
 
-    Returns the rows plus a `truncated` flag. Truncation matters here more than
-    anywhere else in the build: these ids are subtracted from the control pool,
-    so a partial pool would let variability-classified stars into the negatives.
-    The caller refuses to continue when it happens.
+    Also walked by magnitude band: the single-join version covering the whole
+    8-13 range returned TAP 408 twice in a row (measured 2026-11-21), while the
+    same join restricted to one band completes in 7-24 s.
+
+    Truncation matters more here than anywhere else in the build, because these
+    ids are subtracted from the control pool: a partial pool would let
+    variability-classified stars into the negatives. A capped or failed band is
+    therefore fatal and the caller refuses to continue.
     """
 
     from astroquery.gaia import Gaia
 
-    query = f"""
-SELECT TOP {POOL_LIMIT + 1} v.source_id, g.ra, g.dec, g.phot_g_mean_mag, {GAIA_FIELDS}
+    rows: list[dict] = []
+    seen: set[str] = set()
+    malformed = 0
+    duplicates = 0
+    truncatedBands: list[list[float]] = []
+    failedBands: list[dict] = []
+
+    for low, high in magnitudeBands(bands):
+
+        query = f"""
+SELECT TOP {pageSize + 1} v.source_id, g.ra, g.dec, g.phot_g_mean_mag, {GAIA_FIELDS}
 FROM gaiadr3.vari_summary AS v
 JOIN gaiadr3.gaia_source AS g ON v.source_id = g.source_id
 WHERE 1=CONTAINS(POINT('ICRS', g.ra, g.dec),
   CIRCLE('ICRS', {FIELD_CENTRE[0]}, {FIELD_CENTRE[1]}, {FIELD_RADIUS_DEG}))
-  AND g.phot_g_mean_mag BETWEEN {MAG_RANGE[0]} AND {MAG_RANGE[1]}
+  AND g.phot_g_mean_mag BETWEEN {low} AND {high}
 """
 
-    table = launchWithRetry(Gaia, query)
-
-    rows = []
-    malformed = 0
-
-    for row in table[:POOL_LIMIT]:
         try:
-            classes = [
-                name.replace("in_vari_", "")
-                for name in CLASS_PRIORITY
-                if bool(row[name])
-            ]
-            rows.append(
-                {
+            table = launchWithRetry(Gaia, query)
+        except RuntimeError as error:
+            failedBands.append({"band": [round(low, 3), round(high, 3)],
+                                "error": str(error)[:200]})
+            continue
+
+        if table is None or len(table) == 0:
+            continue
+
+        if len(table) > pageSize:
+            truncatedBands.append([round(low, 3), round(high, 3)])
+            table = table[:pageSize]
+
+        for row in table:
+            try:
+                classes = [
+                    name.replace("in_vari_", "")
+                    for name in CLASS_PRIORITY
+                    if bool(row[name])
+                ]
+                entry = {
                     "sourceId": str(int(row["source_id"])),
                     "ra": float(row["ra"]),
                     "dec": float(row["dec"]),
                     "gMag": float(row["phot_g_mean_mag"]),
                     "classes": classes,
                 }
-            )
-        except (TypeError, ValueError):
-            malformed += 1
+            except (TypeError, ValueError):
+                malformed += 1
+                continue
+
+            if entry["sourceId"] in seen:
+                duplicates += 1
+                continue
+            seen.add(entry["sourceId"])
+            rows.append(entry)
 
     return {
         "rows": rows,
-        "truncated": len(table) > POOL_LIMIT,
-        "limit": POOL_LIMIT,
+        "truncatedBands": truncatedBands,
+        "failedBands": failedBands,
+        "truncated": bool(truncatedBands or failedBands),
+        "limit": pageSize,
         "malformedRows": malformed,
+        "duplicatesDropped": duplicates,
     }
 
 
@@ -257,6 +287,34 @@ ORDER BY source_id
 
 def cachePath(ticId: str) -> Path:
     return CACHE_DIR / f"TIC_{ticId}.npz"
+
+
+def callWithTimeout(function, timeoutSeconds: int, *args):
+    """Run a network call that can hang, and abandon it at a deadline.
+
+    Measured 2026-11-21: one TIC search blocked for over eight minutes with no
+    error, freezing the whole build. astroquery/lightkurve cannot be interrupted
+    portably, so the worker is a daemon thread -- the build records a timeout
+    and continues, and a hung worker cannot stop the process from exiting.
+    """
+
+    outcome: dict = {}
+
+    def run():
+        try:
+            outcome["value"] = function(*args)
+        except BaseException as error:  # noqa: BLE001 - re-raised in the caller
+            outcome["error"] = error
+
+    worker = threading.Thread(target=run, daemon=True)
+    worker.start()
+    worker.join(timeoutSeconds)
+
+    if worker.is_alive():
+        raise TimeoutError(f"{function.__name__} exceeded {timeoutSeconds}s")
+    if "error" in outcome:
+        raise outcome["error"]
+    return outcome.get("value")
 
 
 def resolveTic(ra: float, dec: float) -> str | None:
@@ -391,9 +449,54 @@ def matchNegatives(positives: list[dict], controls: list[dict]) -> list[dict]:
                 best, bestDelta = control, delta
         if best is not None:
             used.add(best["sourceId"])
-            chosen.append({**best, "label": 0, "primaryClass": None})
+            chosen.append(
+                {
+                    **best,
+                    "label": 0,
+                    "primaryClass": None,
+                    "matchedPositive": positive["sourceId"],
+                }
+            )
 
     return chosen
+
+
+def pairObjects(objects: dict, negatives: list[dict]) -> tuple[dict, list[dict]]:
+    """Keep only complete positive/control pairs.
+
+    Classed Gaia sources often have no TESS two-minute data, so a positive can
+    vanish after its control has been downloaded. Dropping the orphaned control
+    is what keeps the 1:1 balance the sampling claims; the alternative is a
+    dataset whose class ratio silently follows TESS coverage.
+    """
+
+    bySource = {entry["gaiaSourceId"]: objectId for objectId, entry in objects.items()}
+    controlSources = {control["sourceId"] for control in negatives}
+    paired: dict = {}
+    dropped: list[dict] = []
+
+    for control in negatives:
+        positiveSource = control["matchedPositive"]
+        controlSource = control["sourceId"]
+        if positiveSource in bySource and controlSource in bySource:
+            paired[bySource[positiveSource]] = objects[bySource[positiveSource]]
+            paired[bySource[controlSource]] = objects[bySource[controlSource]]
+        else:
+            missing = "positive" if positiveSource not in bySource else "control"
+            dropped.append(
+                {"positive": positiveSource, "control": controlSource,
+                 "reason": f"no curve for {missing}"}
+            )
+
+    for sourceId, objectId in bySource.items():
+        if objectId in paired or sourceId in controlSources:
+            continue
+        dropped.append(
+            {"positive": sourceId, "control": None,
+             "reason": "no magnitude-matched control"}
+        )
+
+    return paired, dropped
 
 
 # ---------------------------------------------------------------------------
@@ -429,6 +532,15 @@ def writeLabels(
                 },
                 "counts": {
                     "objects": len(objects),
+                    "withTic": sum(1 for o in objects.values() if o.get("tic")),
+                    "withGaiaId": sum(
+                        1 for o in objects.values() if o.get("gaiaSourceId")
+                    ),
+                    # A positive is a vari_summary member by construction; a
+                    # control is a field source deliberately absent from it.
+                    "inGaiaVariabilityTable": sum(
+                        o["weakLabel"] for o in objects.values()
+                    ),
                     "positive": sum(o["weakLabel"] for o in objects.values()),
                     "negative": sum(1 - o["weakLabel"] for o in objects.values()),
                 },
@@ -456,6 +568,8 @@ def main() -> None:
     parser.add_argument("--per-class", type=int, default=4)
     parser.add_argument("--control-bands", type=int, default=3)
     parser.add_argument("--control-page-size", type=int, default=2000)
+    parser.add_argument("--pool-bands", type=int, default=6)
+    parser.add_argument("--pool-page-size", type=int, default=6000)
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -463,26 +577,30 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.per_class < 1 or args.control_bands < 1 or args.control_page_size < 2:
-        parser.error("--per-class and --control-bands must be >= 1, --control-page-size >= 2")
+    if (args.per_class < 1 or args.control_bands < 1 or args.control_page_size < 2
+            or args.pool_bands < 1 or args.pool_page_size < 2):
+        parser.error("band counts must be >= 1 and page sizes >= 2")
 
     warnings.filterwarnings("ignore")
 
     print("querying Gaia variability pool ...", flush=True)
-    poolResult = fetchVariabilityPool()
+    poolResult = fetchVariabilityPool(args.pool_bands, args.pool_page_size)
     pool = poolResult["rows"]
     classed = [row for row in pool if row["classes"]]
     print(
         f"  field rows: {len(pool)}, with a class: {len(classed)}"
-        f" ({poolResult['malformedRows']} malformed rows skipped)",
+        f" ({poolResult['malformedRows']} malformed rows skipped, "
+        f"{poolResult['duplicatesDropped']} duplicates dropped)",
         flush=True,
     )
 
     if poolResult["truncated"]:
         raise SystemExit(
-            f"variability pool hit TOP {poolResult['limit']}: the control pool cannot "
-            "be cleaned of variability sources. Narrow MAG_RANGE or add pagination "
-            "before building labels."
+            "variability pool is incomplete, so the control pool cannot be cleaned "
+            f"of variability sources: capped bands {poolResult['truncatedBands']}, "
+            f"failed bands {[b['band'] for b in poolResult['failedBands']]} "
+            f"(TOP {poolResult['limit']} per band). Raise --pool-page-size or "
+            "--pool-bands before building labels."
         )
 
     positives = takePositives(pool, args.per_class)
@@ -585,7 +703,9 @@ def main() -> None:
         label = candidate["label"]
 
         try:
-            ticId = resolveTic(candidate["ra"], candidate["dec"])
+            ticId = callWithTimeout(
+                resolveTic, TIC_TIMEOUT_S, candidate["ra"], candidate["dec"]
+            )
         except Exception as error:
             failures.append(
                 {"gaiaSourceId": candidate["sourceId"], "label": label,
@@ -611,7 +731,7 @@ def main() -> None:
             continue
 
         try:
-            curve = fetchCurve(ticId)
+            curve = callWithTimeout(fetchCurve, CURVE_TIMEOUT_S, ticId)
         except Exception as error:
             failures.append(
                 {"objectId": objectId, "label": label,
@@ -656,12 +776,25 @@ def main() -> None:
             flush=True,
         )
 
-    writeLabels(objects, failures, args, {"complete": True, **samplingMeta})
+    paired, unpaired = pairObjects(objects, negatives)
 
-    built = sum(o["weakLabel"] for o in objects.values())
+    writeLabels(
+        paired, failures, args,
+        {
+            "complete": True,
+            **samplingMeta,
+            "pairs": len(paired) // 2,
+            "unpairedDropped": unpaired,
+            "droppedBeforePairing": len(objects) - len(paired),
+        },
+    )
+
+    built = sum(o["weakLabel"] for o in paired.values())
     print(
-        f"\nbuilt {len(objects)} objects: {built} positive, "
-        f"{len(objects) - built} negative, {len(failures)} skipped",
+        f"\nbuilt {len(objects)} objects, kept {len(paired)} in "
+        f"{len(paired) // 2} complete pairs: {built} positive, "
+        f"{len(paired) - built} negative, {len(unpaired)} unpaired dropped, "
+        f"{len(failures)} skipped",
         flush=True,
     )
     print(f"wrote {LABELS} (complete=true)", flush=True)

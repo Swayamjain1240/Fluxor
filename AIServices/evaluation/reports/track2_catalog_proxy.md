@@ -1,13 +1,9 @@
 # Track 2 — catalogue proxy labels (weak labels)
 
-**These labels are not ground truth.** An object is positive when Gaia DR3's
-`vari_summary` contains it with `in_vari_classification_result = 1` — Gaia ran
-it through variability classification — and negative when it does not. A
-specific class (`in_vari_*`) is recorded where Gaia assigned one, but most
-classified sources carry none, so the label means "Gaia variability candidate",
-not "known variable of type X". A negative means "not in that catalogue", never
-"not variable". Track 1 (seeded synthetic injection) and Track 2 are separate
-studies; nothing here reads a Track 1 label, split or injected series.
+**These labels are not ground truth.** weakLabel = 1 if the source is present in gaiadr3.vari_summary with in_vari_classification_result = 1 (Gaia ran it through variability classification), else 0. Specific in_vari_* classes are recorded when Gaia assigned one but are not required. A 0 means 'not in the catalogue', not 'not variable'.
+
+Track 1 (seeded synthetic injection) and Track 2 are separate studies; nothing
+here reads a Track 1 label, split or injected series.
 
 ## Scoring
 
@@ -25,8 +21,8 @@ one origin.
 
 No precision, recall, F1 or confusion table is reported, and no score-to-priority
 bucket either. The production boolean flag is derived per curve from
-`contamination="auto"` and fired on all 40 objects in the previous run, so a
-threshold metric would only restate the configuration.
+`contamination="auto"` and fired on every object in the earlier Track 2 run, so
+a threshold metric would only restate the configuration.
 
 ## Provenance
 
@@ -54,7 +50,7 @@ threshold metric would only restate the configuration.
 | Leave-one-out sensitivity | dropping TIC 410354930 (the only positive with an assigned class, ranked 1) leaves AUC 0.5143 over 39 objects with 4 positives |
 
 At this sample size the permutation p-value, not the interval, is the test that
-matters: the interval says how well five positives pin down an AUC, while the
+matters: the interval says how well 5 positives pin down an AUC, while the
 p-value asks whether the ranking is distinguishable from chance at all.
 
 ## Per-object results (ranked by score)
@@ -107,16 +103,13 @@ p-value asks whether the ranking is distinguishable from chance at all.
 1. **Weak labels.** A Gaia variability classification of the star is not
    evidence that any scored window is an anomaly, and catalogue incompleteness
    biases the negatives: many genuine variables are absent from `vari_summary`.
-   An assigned variability class exists for only 1 of the
-   5 positives; the rest are classified candidates
-   with no reported type.
-2. **Very few positives, and no significance.** 5 of
-   40 objects are positive, so the AUC interval is
-   wide and the point estimate is unstable; read it as a direction, not a
-   validated performance figure. The permutation test gives
-   p = 0.2274, so the ranking must not be reported as
-   established: with this few positives a single object can carry it, as the
-   leave-one-out row shows.
+   An assigned variability class exists for only 1 of the 5 positives; the rest
+   are classified candidates with no reported type.
+2. **Very few positives, and no significance.** 5 of 40 objects are positive, so
+   the AUC interval is wide and the point estimate is unstable; read it as a
+   direction, not a validated performance figure. The permutation test gives
+   p=0.2274, so the ranking is not distinguishable from chance at this sample
+   size. A single object can carry it, as the leave-one-out row shows.
 3. **Max-over-windows bias.** An object's score is the maximum over its windows,
    so objects with more windows get more draws. Window counts are in the table
    and are not equal.

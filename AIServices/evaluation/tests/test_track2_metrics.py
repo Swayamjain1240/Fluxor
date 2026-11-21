@@ -19,6 +19,7 @@ if str(AI_ROOT) not in sys.path:
 from evaluation.track2.build_enriched_targets import (  # noqa: E402
     magnitudeBands,
     matchNegatives,
+    pairObjects,
 )
 from evaluation.track2.build_labels import labelFromGaia  # noqa: E402
 from evaluation.track2.run_eval import (  # noqa: E402
@@ -192,3 +193,36 @@ def test_matching_skips_controls_outside_the_magnitude_tolerance():
     controls = [{"sourceId": "c1", "gMag": 11.0, "classes": [], "label": 0}]
 
     assert matchNegatives(positives, controls) == []
+
+
+def test_pairing_drops_a_control_whose_positive_has_no_curve():
+    """Balance is a property of the built dataset, not of the candidate list."""
+
+    objects = {
+        "TIC 1": {"objectId": "TIC 1", "gaiaSourceId": "p1", "weakLabel": 1},
+        "TIC 2": {"objectId": "TIC 2", "gaiaSourceId": "c1", "weakLabel": 0},
+        "TIC 3": {"objectId": "TIC 3", "gaiaSourceId": "c2", "weakLabel": 0},
+    }
+    negatives = [
+        {"sourceId": "c1", "matchedPositive": "p1", "label": 0},
+        {"sourceId": "c2", "matchedPositive": "p2", "label": 0},
+    ]
+
+    paired, dropped = pairObjects(objects, negatives)
+
+    assert sorted(paired) == ["TIC 1", "TIC 2"]
+    assert [row["control"] for row in dropped] == ["c2"]
+    assert dropped[0]["reason"] == "no curve for positive"
+
+
+def test_pairing_drops_a_positive_that_matched_no_control():
+    objects = {
+        "TIC 1": {"objectId": "TIC 1", "gaiaSourceId": "p1", "weakLabel": 1},
+    }
+
+    paired, dropped = pairObjects(objects, [])
+
+    assert paired == {}
+    assert dropped == [
+        {"positive": "p1", "control": None, "reason": "no magnitude-matched control"}
+    ]

@@ -39,6 +39,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import textwrap
 import time
 from pathlib import Path
 
@@ -68,6 +69,10 @@ MAX_FEATURES = 1.0
 RANDOM_STATE = 42
 
 BOOTSTRAP_SEED = 42
+
+# Markdown prose is reflowed here rather than hand-wrapped in the template, so a
+# longer number or word cannot leave a broken line behind.
+PROSE_WIDTH = 80
 BOOTSTRAP_ITERATIONS = 2000
 PERMUTATION_ITERATIONS = 20000
 
@@ -230,18 +235,82 @@ def writeReport(payload: dict, report: Path) -> None:
         f"over {sensitivity['objects']} objects with {sensitivity['positives']} positives"
     )
 
+    counts = payload["counts"]
+    nObjects = counts["objects"]
+    nPositives = counts["positive"]
+    pValue = permutation.get("pValue")
+    pShort = "undefined" if pValue is None else f"{pValue:.4f}"
+
+    sampleText = textwrap.fill(
+        "At this sample size the permutation p-value, not the interval, is the "
+        f"test that matters: the interval says how well {nPositives} positives "
+        "pin down an AUC, while the p-value asks whether the ranking is "
+        "distinguishable from chance at all.",
+        width=PROSE_WIDTH,
+    )
+
+    if nPositives and classCount == nPositives:
+        classText = (
+            f"All {nPositives} positives carry an assigned class, so a positive "
+            "means 'classified as that kind of variable', not merely 'a "
+            "variability candidate'."
+        )
+    else:
+        classText = (
+            f"An assigned variability class exists for only {classCount} of the "
+            f"{nPositives} positives; the rest are classified candidates with no "
+            "reported type."
+        )
+
+    weakLabelText = textwrap.fill(
+        "**Weak labels.** A Gaia variability classification of the star is not "
+        "evidence that any scored window is an anomaly, and catalogue "
+        "incompleteness biases the negatives: many genuine variables are absent "
+        f"from `vari_summary`. {classText}",
+        width=PROSE_WIDTH,
+        initial_indent="1. ",
+        subsequent_indent="   ",
+    )
+
+    if pValue is None:
+        significanceHeading = "**Very few positives.**"
+        significanceText = "The permutation test could not be computed here."
+    elif pValue < 0.05:
+        significanceHeading = "**Very few positives.**"
+        significanceText = (
+            f"The permutation test gives p={pShort}, so the ranking is "
+            "unlikely under a random labelling, but it still rests on "
+            f"{nPositives} positives: a single object can carry it."
+        )
+    else:
+        significanceHeading = "**Very few positives, and no significance.**"
+        significanceText = (
+            f"The permutation test gives p={pShort}, so the ranking is not "
+            "distinguishable from chance at this sample size."
+        )
+        if sensitivity:
+            significanceText += (
+                " A single object can carry it, as the leave-one-out row shows."
+            )
+
+    positivesText = textwrap.fill(
+        f"{significanceHeading} {nPositives} of {nObjects} objects are "
+        "positive, so the AUC interval is wide and the point estimate is "
+        f"unstable; read it as a direction, not a validated performance figure. "
+        f"{significanceText}",
+        width=PROSE_WIDTH,
+        initial_indent="2. ",
+        subsequent_indent="   ",
+    )
+
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(
         f"""# Track 2 — catalogue proxy labels (weak labels)
 
-**These labels are not ground truth.** An object is positive when Gaia DR3's
-`vari_summary` contains it with `in_vari_classification_result = 1` — Gaia ran
-it through variability classification — and negative when it does not. A
-specific class (`in_vari_*`) is recorded where Gaia assigned one, but most
-classified sources carry none, so the label means "Gaia variability candidate",
-not "known variable of type X". A negative means "not in that catalogue", never
-"not variable". Track 1 (seeded synthetic injection) and Track 2 are separate
-studies; nothing here reads a Track 1 label, split or injected series.
+**These labels are not ground truth.** {payload['labelDefinition']}
+
+Track 1 (seeded synthetic injection) and Track 2 are separate studies; nothing
+here reads a Track 1 label, split or injected series.
 
 ## Scoring
 
@@ -259,8 +328,8 @@ one origin.
 
 No precision, recall, F1 or confusion table is reported, and no score-to-priority
 bucket either. The production boolean flag is derived per curve from
-`contamination="auto"` and fired on all 40 objects in the previous run, so a
-threshold metric would only restate the configuration.
+`contamination="auto"` and fired on every object in the earlier Track 2 run, so
+a threshold metric would only restate the configuration.
 
 ## Provenance
 
@@ -272,9 +341,9 @@ threshold metric would only restate the configuration.
 ## Label counts
 
 - objects: {payload['counts']['objects']}
-- with a TIC row: {payload['counts']['withTic']}
-- with a Gaia source id: {payload['counts']['withGaiaId']}
-- present in `vari_summary`: {payload['counts']['inGaiaVariabilityTable']}
+- with a TIC row: {payload['counts'].get('withTic', 'not recorded')}
+- with a Gaia source id: {payload['counts'].get('withGaiaId', 'not recorded')}
+- present in `vari_summary`: {payload['counts'].get('inGaiaVariabilityTable', 'not recorded')}
 - positive (weak label): {payload['counts']['positive']}
 - of those, with a specific Gaia variability class: {classCount}
 
@@ -287,9 +356,7 @@ threshold metric would only restate the configuration.
 | ROC-AUC stratified bootstrap 95% CI | {ciText} |
 | Leave-one-out sensitivity | {sensitivityText} |
 
-At this sample size the permutation p-value, not the interval, is the test that
-matters: the interval says how well five positives pin down an AUC, while the
-p-value asks whether the ranking is distinguishable from chance at all.
+{sampleText}
 
 ## Per-object results (ranked by score)
 
@@ -299,19 +366,8 @@ p-value asks whether the ranking is distinguishable from chance at all.
 
 ## Limitations
 
-1. **Weak labels.** A Gaia variability classification of the star is not
-   evidence that any scored window is an anomaly, and catalogue incompleteness
-   biases the negatives: many genuine variables are absent from `vari_summary`.
-   An assigned variability class exists for only {classCount} of the
-   {payload['counts']['positive']} positives; the rest are classified candidates
-   with no reported type.
-2. **Very few positives, and no significance.** {payload['counts']['positive']} of
-   {payload['counts']['objects']} objects are positive, so the AUC interval is
-   wide and the point estimate is unstable; read it as a direction, not a
-   validated performance figure. The permutation test gives
-   p = {permutation['pValue']:.4f}, so the ranking must not be reported as
-   established: with this few positives a single object can carry it, as the
-   leave-one-out row shows.
+{weakLabelText}
+{positivesText}
 3. **Max-over-windows bias.** An object's score is the maximum over its windows,
    so objects with more windows get more draws. Window counts are in the table
    and are not equal.
@@ -428,6 +484,16 @@ def main() -> None:
         },
         "windowsPooled": int(pooled.shape[0]),
         "provenance": args.provenance,
+        "labelDefinition": labelPayload.get(
+            "labelDefinition",
+            "An object is positive when Gaia DR3's `vari_summary` contains it with "
+            "`in_vari_classification_result = 1` -- Gaia ran it through variability "
+            "classification -- and negative when it does not. A specific class is "
+            "recorded where Gaia assigned one, but most classified sources carry "
+            "none, so the label means 'Gaia variability candidate', not 'known "
+            "variable of type X'. A negative means 'not in that catalogue', never "
+            "'not variable'.",
+        ),
         "fetchedAtUtc": labelPayload.get("fetchedAtUtc", payloadTime),
         "counts": labelPayload["counts"],
         "objects": rows,
