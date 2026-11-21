@@ -237,7 +237,7 @@ reflects that setting rather than detection skill (H3).
 |---|---|
 | L1 | ML pipeline is orphaned; evaluation calls the modules directly rather than through the API |
 | L2 | No real anomaly ground truth exists in the project; Track 1 positives are synthetic |
-| L3 | Track 2 labels are weak/proxy, not confirmed. Two samples are scored on object-level labels from Gaia DR3 `vari_summary` (`in_vari_classification_result`): the 40 frozen targets with 5 positives (`evaluation/reports/track2_catalog_proxy.md`) and a balanced magnitude-matched sample of 14 objects with 7 positives (`evaluation/reports/track2_catalog_enriched.md`). Both are weak-label directions, not validated performance |
+| L3 | Track 2 labels are weak/proxy, not confirmed. Three samples are scored on object-level labels from Gaia DR3 `vari_summary` (`in_vari_classification_result`): the 40 frozen targets with 5 positives (`evaluation/reports/track2_catalog_proxy.md`), and two balanced magnitude-matched samples — 14 objects with 7 positives (`evaluation/reports/track2_catalog_enriched.md`) and 28 objects with 14 positives (`evaluation/reports/track2_catalog_enriched_larger.md`). All are weak-label directions, not validated performance |
 | L4 | RAG corpus is proposed, not yet approved or ingested; all RAG numbers depend on it |
 | L5 | RAG relevance is judged by a single annotator (the agent), so no inter-annotator agreement can be reported. Intra-rater re-judgment run on 20% of the queries (12 queries, 56 passages): exact agreement 0.696, within one grade 0.946, binary κ 0.532 — stability only, not accuracy. See `evaluation/reports/rag_intra_rater.md` |
 | L6 | Retrieval quality is measured separately from LLM answer quality; no end-to-end answer-faithfulness metric is claimed |
@@ -273,21 +273,25 @@ All Part 2/3/4 files remain proposals pending approval and are listed in the imp
 |---|---|---|
 | Track 1 — seeded synthetic injection | measured | `reports/ml_baseline.md`, `reports/ml_calibration.md` |
 | Track 2 — catalogue proxy, frozen sample | measured | `reports/track2_catalog_proxy.md`: n = 40, 5 positives, AUC 0.6114, permutation p 0.2274 |
-| Track 2 — catalogue proxy, balanced sample | measured | `reports/track2_catalog_enriched.md`: n = 14, 7 positives, AUC 0.8367, permutation p 0.0185 |
+| Track 2 — catalogue proxy, balanced sample (per-class cap 4) | measured | `reports/track2_catalog_enriched.md`: n = 14, 7 positives, AUC 0.8367, permutation p 0.0185 |
+| Track 2 — catalogue proxy, larger balanced sample (per-class cap 8) | measured | `reports/track2_catalog_enriched_larger.md`: n = 28, 14 positives, AUC 0.8571, permutation p 0.0005 |
 | RAG baseline, tuning, intra-rater stability | measured | `reports/rag_baseline.md`, `reports/rag_tuning.md`, `reports/rag_intra_rater.md` |
-| Agent pilot | **not run** | blocked: the provider answers HTTP 429 `credit_balance_exhausted`; the key itself authenticates |
+| Agent pilot | **not run — out of scope for this round** | no agent metric is reported; the provider account has no credit (HTTP 429 `credit_balance_exhausted`) |
 
 Blockers to what is left:
 
-1. **The agent pilot needs provider credit.** No agent metric appears in this
-   register because no pilot request has completed. None will be reported until
-   one does; a structural or timing number from a failed run would be invented.
+1. **The agent pilot is left out of this round.** It cannot run while the
+   provider account has no credit (HTTP 429 `credit_balance_exhausted`, the key
+   itself authenticates). No agent metric appears in this register, and none will
+   be inferred from a failed run.
 2. **Gaia archive downtime, 25 Nov 12:00 CET to 2 Dec 12:00 CET.** Any rebuild of
    either Track 2 sample waits for the archive to return. The current samples are
    built and scored from the 2026-11-20 and 2026-11-21 fetches recorded in their
    provenance lines.
-3. **Track 2 sample size.** The balanced sample's permutation p-value clears
-   0.05, but with 7 positives one object carries much of the ranking. A larger
-   balanced sample (per-class cap 8, roughly 12–14 pairs) is the next sensitivity
-   run; it is not required to state the current result, and it is not evidence
-   that the ranking generalises.
+3. **Track 2 rests on few positives even after doubling them.** The per-class
+   cap 8 build yielded 14 complete pairs from 48 positive candidates: 43 objects
+   had no 2-minute TESS curve and the rest lost their pair, so the balance is a
+   property of the built data rather than of the candidate list. AUC moves from
+   0.8367 to 0.8571 and the permutation p-value from 0.0185 to 0.0005, but 14
+   positives still leave a bootstrap interval of 0.673 to 1.000. Neither sample
+   is a validated performance figure.
